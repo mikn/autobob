@@ -1,5 +1,4 @@
 import os.path
-import importlib.machinery
 import inspect
 import pkgutil
 import logging
@@ -10,6 +9,7 @@ import autobob.helpers
 
 LOG = logging.getLogger(__name__)
 # COMPLICATED IMPORT LOGIC GOES HERE
+
 
 class Factory(object):
     def __init__(self):
@@ -24,28 +24,28 @@ class Factory(object):
         plugins = {}
 
         for finder, name, ispkg in pkgutil.walk_packages(path=[plugin_path]):
-            if not ispkg:
-                full_name = 'autobob.core.{}'.format(name)
-                LOG.debug('Found plugin: {}'.format(name))
-                if full_name not in sys.modules:
-                    LOG.debug('Importing plugin: {}'.format(name))
-                    module = finder.find_module(full_name
-                                                ).load_module(full_name)
-                    classes = inspect.getmembers(module, inspect.isclass)
-                    LOG.debug('Found classes: {}'.format(classes))
-                    for name, cls in classes:
-                        plugins[name] = cls()
+            if ispkg:
+                continue
+            full_name = 'autobob.core.{}'.format(name)
+            LOG.debug('Found plugin: {}'.format(name))
+            if full_name not in sys.modules:
+                LOG.debug('Importing plugin: {}'.format(name))
+                module = finder.find_module(full_name
+                                            ).load_module(full_name)
+                classes = inspect.getmembers(module, inspect.isclass)
+                LOG.debug('Found classes: {}'.format(classes))
+                for name, cls in classes:
+                    plugins[name] = cls()
         return plugins
-
 
     def get(self, plugin):
         if plugin in self._plugins:
             return self._plugins[plugin]
-        raise Error('Module does not exist!')
+        raise ImportError('Module does not exist!')
         pass
 
     def get_callback(self, func):
-        for cls in inspect.getmro(func):
-            if func.__name__ in cls.__dict__:
-                return sel.get(cls.__name__)
-        raise Error('Deary me! Unbound methods abound!')
+        if not hasattr(func, 'class_name'):
+            return func
+        obj = self.get(func.class_name)
+        return getattr(obj, func.__name__)

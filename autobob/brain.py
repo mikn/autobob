@@ -1,6 +1,5 @@
 import multiprocessing
 import queue
-import random
 import threading
 import logging
 
@@ -15,6 +14,7 @@ mention_matchers = []
 matchq = queue.PriorityQueue()
 messageq = queue.Queue()
 thread_pool = []
+
 
 def init_threads(workers, args):
     pool = []
@@ -34,7 +34,9 @@ def init_threads(workers, args):
     return pool
 
 
-def boot():
+def boot(factory):
+    global matchers, relevant_matchers, catchalls, matchq, messageq
+    global thread_pool
     thread_pool = init_threads(autobob.workers.regex_worker, (matchq,))
 
     while True:
@@ -46,10 +48,11 @@ def boot():
             continue
         relevant_matchers = matchers
         if message.mentions('botname'):
+            LOG.debug('Adding in metion matchers since we found botname')
             relevant_matchers.extend(mention_matchers)
 
         for matcher in relevant_matchers:
-            workers.regexq.put(matcher)
+            autobob.workers.regexq.put((matcher, str(message)))
 
         for callback in catchalls:
             matchq.put((100, callback))
@@ -57,13 +60,14 @@ def boot():
         autobob.workers.regexq.join()
 
         try:
-            callback = matchq.get_nowait()
+            _, matcher = matchq.get_nowait()
+            callback = matcher.get_callback(factory)
             callback(message)
             with matchq.mutex:
                 matchq.queue.clear()
         except queue.Empty:
             pass
-        except Error as e:
+        except Exception as e:
             LOG.error(e)
             # We probably want to print the debug in the "home" channel
             # and perhaps a "sorry" where the message came from unless admin

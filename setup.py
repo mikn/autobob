@@ -10,7 +10,7 @@ setup(
     author='Mikael Knutsson',
     author_email='mikael.knutsson@gmail.com',
     description='A bot framework made according to actual software principles',
-    long_description=open('README.txt').read(),
+    long_description=open('README.md').read(),
     classifiers='License :: OSI Approved :: BSD License',
     install_requires=inst_reqs,
     entry_points={

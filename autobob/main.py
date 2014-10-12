@@ -1,6 +1,4 @@
 import threading
-import toml
-
 import logging
 LOG = logging.getLogger(__name__)
 
@@ -19,18 +17,23 @@ import autobob.plugins
 # TODO: Good name for core.py
 # TODO: Allow bot to reply with more than one handler?
 
+
 def main():
     logging.getLogger('autobob').setLevel(logging.DEBUG)
 
     LOG.debug('Importing plugins!')
     factory = autobob.plugins.Factory()
 
-    brain_thread = threading.Thread(name='brain', target=autobob.brain.boot)
+    brain_thread = threading.Thread(
+        name='brain',
+        target=autobob.brain.boot,
+        args=(factory,)
+    )
     LOG.debug('Booting brain!')
     brain_thread.start()
 
     LOG.debug('Starting Service Listener!')
-    fakemsg = autobob.robot.Message('Hello world!', 'athur!')
+    fakemsg = autobob.robot.Message('Hello botname!', 'athur!')
     autobob.brain.messageq.put(fakemsg)
 
 

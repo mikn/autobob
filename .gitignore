@@ -53,5 +53,8 @@ docs/_build/
 # PyBuilder
 target/
 
+# Rope
+.ropeproject/
+
 # VIM stuff
 *.sw[n-p]

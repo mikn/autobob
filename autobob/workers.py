@@ -11,6 +11,7 @@ def regex_worker(matchq):
         LOG.debug('Trying match with regex /{}/'.format(matcher.pattern))
 
         if matcher.pattern.match(message):
-            matchq.put((matcher.priority, matcher.callback))
+            LOG.debug('Match found against {}!'.format(matcher.pattern))
+            matchq.put((matcher.priority, matcher))
 
         regexq.task_done()
