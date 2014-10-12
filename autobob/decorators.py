@@ -1,10 +1,10 @@
 import functools
 import logging
 
-LOG = logging.getLogger(__name__)
-
 import autobob.brain
 import autobob.robot
+
+LOG = logging.getLogger(__name__)
 
 
 def always(func):
@@ -16,25 +16,23 @@ def always(func):
 # Should probably get the class from the factory before passing it into
 # the matcher object
 def respond_to(pattern):
-    def _dec(func):
-        def capture(*args, **kwargs):
-            return func(*args, **kwargs)
-        if not hasattr(func, 'patterns'):
-            func.patterns = []
-        func.patterns.append((pattern, True))
-        return func
-    return _dec
+    def wrapper(func):
+        return _pattern_handler(func, pattern, autobob.brain.matchers)
+    return wrapper
 
 
 def hear(pattern):
-    def _dec(func):
-        def capture(*args, **kwargs):
-            return func(*args, **kwargs)
-        if not hasattr(func, 'patterns'):
-            func.patterns = []
-        func.patterns.append((pattern, False))
-        return func
-    return _dec
+    def wrapper(func):
+        return _pattern_handler(func, pattern, autobob.brain.matchers)
+    return wrapper
+
+
+def _pattern_handler(func, pattern, matchers):
+    func.attach_class = True
+    matcher = autobob.robot.Matcher(func, pattern)
+    matchers.append(matcher)
+    LOG.debug('Adding pattern: {} for as a matcher'.format(pattern))
+    return func
 
 
 def randomly(func,
@@ -58,17 +56,7 @@ def scheduled(func,
 def plugin(cls):
     LOG.debug('Iterating over class {}'.format(cls))
     for name, method in cls.__dict__.items():
-        if not hasattr(method, 'patterns'):
-            continue
-        setattr(method, 'class_name', cls.__name__)
-        setattr(method, 'func_name', name)
-        for pattern, mentions in method.patterns:
-            matcher = autobob.robot.Matcher(method, pattern)
-            if mentions:
-                autobob.brain.mention_matchers.append(matcher)
-            else:
-                autobob.brain.mention.append(matcher)
-
-            LOG.debug('Adding pattern: {} for as a matcher'.format(pattern))
+        if hasattr(method, 'attach_class') and method.attach_class:
+            setattr(method, 'class_name', cls.__name__)
 
     return cls

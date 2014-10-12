@@ -66,6 +66,11 @@ def boot(factory):
             callback(message)
             with matchq.mutex:
                 matchq.queue.clear()
+        except ImportError:
+            LOG.warning('Removing matcher with regex {} and method: {}. I can '
+                        'however not tell you which class it comes from...'
+                        ''.format(matcher.pattern, matcher._func.__name__))
+            del(matchers[matchers.index(matcher)])
         except queue.Empty:
             pass
         except Exception as e:

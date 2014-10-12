@@ -38,6 +38,7 @@ def main():
     autobob.brain.messageq.put(fakemsg)
     time.sleep(2)
     autobob.brain.messageq.put(fakemsg)
+    time.sleep(2)
 
 
 if __name__ == '__main__':
