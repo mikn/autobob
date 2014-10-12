@@ -6,7 +6,6 @@ LOG = logging.getLogger(__name__)
 import autobob.brain
 import autobob.plugins
 
-# TODO: Factory and bindings between Client and main loop
 # TODO: Make the main loop agnostic of different types of matchers
 # TODO: Testing
 # TODO: XMPP Plugin
@@ -32,13 +31,8 @@ def main():
     brain_thread.start()
 
     LOG.debug('Starting Service Listener!')
-    fakemsg = autobob.robot.Message('Hello botname!', 'athur!')
-    autobob.brain.messageq.put(fakemsg)
-    time.sleep(2)
-    autobob.brain.messageq.put(fakemsg)
-    time.sleep(2)
-    autobob.brain.messageq.put(fakemsg)
-    time.sleep(2)
+    service = factory.get_service()
+    service.run()
 
 
 if __name__ == '__main__':

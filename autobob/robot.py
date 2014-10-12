@@ -4,10 +4,10 @@ LOG = logging.getLogger(__name__)
 
 
 class Message(object):
-    def __init__(self, message, author, room=None):
+    def __init__(self, message, author, reply_path=None):
         self._message = message
         self._author = author
-        self._room = room
+        self._reply_path = reply_path
         # TODO: Parse for mentions through Service
         self._mentions = ['botname']
 
@@ -46,6 +46,9 @@ class Storage(object):
 class Service(object):
     def __init__(self):
         pass
+
+    def run(self):
+        raise NotImplementedError()
 
     def join_room(self, room):
         raise NotImplementedError()

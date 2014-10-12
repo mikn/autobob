@@ -1,5 +1,5 @@
 defaults = {
     'storage_plugin': 'Shelve',
-    'service_plugin': 'HipChat',
+    'service_plugin': 'Stdio',
     'core_path': './core',
 }

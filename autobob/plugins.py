@@ -54,3 +54,6 @@ class Factory(object):
             raise ImportError()
         obj = self.get(func.class_name)
         return getattr(obj, func.__name__)
+
+    def get_service(self):
+        return self.get('StdioService')
