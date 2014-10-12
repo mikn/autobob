@@ -26,7 +26,7 @@ def respond_to(pattern):
     return _dec
 
 
-def hear(func, pattern):
+def hear(pattern):
     def _dec(func):
         def capture(*args, **kwargs):
             return func(*args, **kwargs)

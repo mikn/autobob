@@ -35,21 +35,22 @@ def init_threads(workers, args):
 
 
 def boot(factory):
-    global matchers, relevant_matchers, catchalls, matchq, messageq
-    global thread_pool
     thread_pool = init_threads(autobob.workers.regex_worker, (matchq,))
 
     while True:
+        relevant_matchers = []
         message = messageq.get()
         LOG.debug('Processing message: {}'.format(message))
         if type(message) is not autobob.robot.Message:
             LOG.warning('Found object in message queue that was not a '
                         'message at all! Type: {}'.format(type(message)))
             continue
-        relevant_matchers = matchers
+        relevant_matchers.extend(matchers)
         if message.mentions('botname'):
             LOG.debug('Adding in metion matchers since we found botname')
             relevant_matchers.extend(mention_matchers)
+
+        LOG.debug('Number of matchers: {}'.format(len(relevant_matchers)))
 
         for matcher in relevant_matchers:
             autobob.workers.regexq.put((matcher, str(message)))
