@@ -1,0 +1,8 @@
+croniter
+dnspython3
+hiredis
+hypchat
+pyinotify
+regex
+sleekxmpp
+toml
