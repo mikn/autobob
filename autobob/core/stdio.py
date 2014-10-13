@@ -11,14 +11,17 @@ class StdioService(autobob.Service):
         self._thread = threading.Thread(name='service', target=self._loop)
 
     def _loop(self):
+        room = autobob.robot.Room('stdin',
+                                  'stdin fake room',
+                                  ['botname', 'mikn'],
+                                  self.send_to_room)
         for line in sys.stdin:
-            msg = autobob.robot.Message(line, 'system', self)
+            msg = autobob.robot.Message(line, 'system', room)
             autobob.brain.messageq.put(msg)
 
     def run(self):
-        LOG.debug('Booting service thread...')
         self._thread.daemon = True
         self._thread.start()
 
-    def send_message(self, message):
-        sys.stdout.write(message)
+    def send_to_room(self, room, message):
+        sys.stdout.write(message + '\n')

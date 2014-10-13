@@ -5,6 +5,7 @@ LOG = logging.getLogger(__name__)
 
 class Message(object):
     def __init__(self, message, author, reply_path=None):
+        assert issubclass(reply_path, ChatObject)
         self._message = message
         self._author = author
         self._reply_path = reply_path
@@ -16,26 +17,33 @@ class Message(object):
 
     def reply(self, message):
         LOG.debug('Sending message {} to appropriate places..'.format(message))
-        pass
+        self._reply_path.say(message)
 
     def __str__(self):
         return self._message
 
 
-class Room(object):
-    def __init__(self, topic, roster):
+class ChatObject(object):
+    def say(self, message):
+        raise NotImplementedError()
+
+
+class Room(ChatObject):
+    def __init__(self, name, topic, roster, reply_path):
         self._roster = roster
         self._topic = topic
+        self._reply_path = reply_path
 
     def say(self, message):
-        pass
+        self._reply_path(self, message)
 
 
-class User(object):
+class User(ChatObject):
     pass
 
 
 class Plugin(object):
+    # Needs factory for room getting for saying things...
     pass
 
 
