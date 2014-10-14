@@ -12,10 +12,11 @@ LOG = logging.getLogger(__name__)
 
 
 class Factory(object):
-    def __init__(self):
+    def __init__(self, config):
+        self._config = config
         self._plugins = {}
         # Terribly hard coded
-        path = os.path.join(autobob.__path__.pop(), 'core')
+        path = config['core_path']
         self._plugins.update(self._load_plugins(path))
 
     def _load_plugins(self, path):
@@ -37,6 +38,8 @@ class Factory(object):
                 for name, cls in classes:
                     if issubclass(cls, autobob.Plugin):
                         plugins[name] = cls(self)
+                    elif name in self._config:
+                        plugins[name] = cls(self._config[name])
                     else:
                         plugins[name] = cls()
         return plugins
@@ -59,7 +62,10 @@ class Factory(object):
         return getattr(obj, func.__name__)
 
     def get_service(self):
-        return self.get('StdioService')
+        return self.get(self._config['service_plugin'])
 
     def get_storage(self):
-        return self.get('ShelveStorage')
+        return self.get(self._config['storage_plugin'])
+
+    def get_config(self):
+        return self._config

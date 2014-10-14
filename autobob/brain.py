@@ -49,6 +49,8 @@ def boot(factory):
         for matcher in matchers:
             autobob.workers.regexq.put((matcher, message))
 
+        # TODO: make compatible with get_callback pattern used below
+        # TODO: warn if you have more than one, refer to @listen decorator
         for callback in catchalls:
             matchq.put((100, callback))
 

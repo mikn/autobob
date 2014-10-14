@@ -68,6 +68,7 @@ class Plugin(object):
         return self._factory.get_storage()
 
 
+# TODO: Provide a dict interface
 class Storage(object):
     pass
 
@@ -80,6 +81,9 @@ class Service(object):
         raise NotImplementedError()
 
     def join_room(self, room):
+        raise NotImplementedError()
+
+    def get_room(self, name):
         raise NotImplementedError()
 
     def send_message(self, message):
