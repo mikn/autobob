@@ -6,12 +6,12 @@ LOG = logging.getLogger(__name__)
 import autobob.brain
 import autobob.plugins
 
-# TODO: Make the main loop agnostic of different types of matchers
 # TODO: Testing
-# TODO: XMPP Plugin
-# TODO: Redis Plugin
-# TODO: HipChat Plugin
 # TODO: Configuration
+# TODO: Shelve Plugin
+# TODO: XMPP Plugin
+# TODO: HipChat Plugin
+# TODO: Redis Plugin
 # TODO: Scheduler
 # TODO: Allow bot to reply with more than one handler?
 

@@ -4,11 +4,11 @@ import pkgutil
 import logging
 import sys
 
+import autobob
 import autobob.core
 import autobob.helpers
 
 LOG = logging.getLogger(__name__)
-# COMPLICATED IMPORT LOGIC GOES HERE
 
 
 class Factory(object):
@@ -16,9 +16,9 @@ class Factory(object):
         self._plugins = {}
         # Terribly hard coded
         path = os.path.join(autobob.__path__.pop(), 'core')
-        self._plugins.update(self.load_plugins(path))
+        self._plugins.update(self._load_plugins(path))
 
-    def load_plugins(self, path):
+    def _load_plugins(self, path):
         plugin_path = autobob.helpers.abs_path(path)
         LOG.debug('Looking for plugins at {}'.format(plugin_path))
         plugins = {}
@@ -35,7 +35,10 @@ class Factory(object):
                 classes = inspect.getmembers(module, inspect.isclass)
                 LOG.debug('Found classes: {}'.format(classes))
                 for name, cls in classes:
-                    plugins[name] = cls()
+                    if issubclass(cls, autobob.Plugin):
+                        plugins[name] = cls(self)
+                    else:
+                        plugins[name] = cls()
         return plugins
 
     def get(self, plugin):
@@ -57,3 +60,6 @@ class Factory(object):
 
     def get_service(self):
         return self.get('StdioService')
+
+    def get_storage(self):
+        return self.get('ShelveStorage')

@@ -5,12 +5,11 @@ import logging
 
 LOG = logging.getLogger(__name__)
 
-import autobob.robot
+import autobob
 import autobob.workers
 
 catchalls = []
 matchers = []
-mention_matchers = []
 matchq = queue.PriorityQueue()
 messageq = queue.Queue()
 thread_pool = []
@@ -38,22 +37,17 @@ def boot(factory):
     thread_pool = init_threads(autobob.workers.regex_worker, (matchq,))
 
     while True:
-        relevant_matchers = []
         message = messageq.get()
         LOG.debug('Processing message: {}'.format(message))
-        if type(message) is not autobob.robot.Message:
+        if type(message) is not autobob.Message:
             LOG.warning('Found object in message queue that was not a '
                         'message at all! Type: {}'.format(type(message)))
             continue
-        relevant_matchers.extend(matchers)
-        if message.mentions('botname'):
-            LOG.debug('Adding in metion matchers since we found botname')
-            relevant_matchers.extend(mention_matchers)
 
-        LOG.debug('Number of matchers: {}'.format(len(relevant_matchers)))
+        LOG.debug('Number of matchers: {}'.format(len(matchers)))
 
-        for matcher in relevant_matchers:
-            autobob.workers.regexq.put((matcher, str(message)))
+        for matcher in matchers:
+            autobob.workers.regexq.put((matcher, message))
 
         for callback in catchalls:
             matchq.put((100, callback))

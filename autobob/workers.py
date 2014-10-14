@@ -10,8 +10,8 @@ def regex_worker(matchq):
         matcher, message = regexq.get()
         LOG.debug('Trying match with regex {}'.format(matcher.pattern))
 
-        if matcher.pattern.match(message):
+        if matcher.condition(message) and matcher.pattern.match(str(message)):
             LOG.debug('Match found against {}!'.format(matcher.pattern))
-            matchq.put((matcher.priority, matcher))
+            matchq.put((matcher.prio, matcher))
 
         regexq.task_done()
