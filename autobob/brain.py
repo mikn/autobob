@@ -55,11 +55,14 @@ def boot(factory):
         for matcher in matchers:
             autobob.workers.regexq.put((matcher, message))
 
-        # TODO: make compatible with get_callback pattern used below
-        # TODO: warn if you have more than one, refer to @listen decorator
-        for func in catchalls:
+        # TODO: warn if you have more than one that is not "always" with the
+        # same priority
+        for func, always in catchalls:
             callback = autobob.Callback(func)
-            matchq.put((callback.prio, callback))
+            if not always:
+                matchq.put((callback.prio, callback))
+            else:
+                callback.get_callback(factory)(message)
 
         autobob.workers.regexq.join()
 

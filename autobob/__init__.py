@@ -110,6 +110,8 @@ class Callback(object):
         self._callback = None
         self._func = func
         self.prio = prio
+        if hasattr(func, '_priority'):
+            self.prio = func._priority
         # TODO: Share lock for all methods on same object
         self.lock = ''
 
