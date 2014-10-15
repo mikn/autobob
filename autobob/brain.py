@@ -1,3 +1,4 @@
+import sys
 import multiprocessing
 import queue
 import threading
@@ -27,15 +28,15 @@ def init_threads(workers, args):
     for i in range(thread_count):
         t = threading.Thread(target=workers, args=args)
         pool.append(t)
-        t.daemon = True
         t.start()
 
     return pool
 
 
 def boot(factory):
-    thread_pool = init_threads(autobob.workers.regex_worker, (matchq,))
+    storage = factory.get_storage()
 
+    thread_pool = init_threads(autobob.workers.regex_worker, (matchq,))
     while True:
         message = messageq.get()
         LOG.debug('Processing message: {}'.format(message))
@@ -71,9 +72,10 @@ def boot(factory):
             pass
         except Exception as e:
             LOG.error(e)
-            # We probably want to print the debug in the "home" channel
+            # TODO: We probably want to print the debug in the "home" channel
             # and perhaps a "sorry" where the message came from unless admin
             pass
 
+        storage.sync()
         messageq.task_done()
         LOG.debug('Processing done!')

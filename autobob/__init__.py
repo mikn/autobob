@@ -1,3 +1,4 @@
+import collections
 import sys
 import logging
 import regex
@@ -35,6 +36,10 @@ class Message(object):
     def __str__(self):
         return self._message
 
+    @property
+    def author(self):
+        return self._author
+
 
 class ChatObject(object):
     def say(self, message):
@@ -66,19 +71,21 @@ class MetaPlugin(type):
 class Plugin(metaclass=MetaPlugin):
     def __init__(self, factory):
         self._factory = factory
+        # Let's namespace the plugin's storage
+        storage = factory.get_storage()
+        name = type(self).__name__
+        if name not in storage:
+            storage[name] = {}
+        self.storage = storage[name]
 
     @property
     def service(self):
         return self._factory.get_service()
 
-    @property
-    def storage(self):
-        return self._factory.get_storage()
 
-
-# TODO: Provide a dict interface
-class Storage(object):
-    pass
+class Storage(collections.UserDict):
+    def sync(self):
+        pass
 
 
 class Service(object):

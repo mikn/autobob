@@ -15,14 +15,14 @@ class Factory(object):
     def __init__(self, config):
         self._config = config
         self._plugins = {}
-        # Terribly hard coded
         path = config['core_path']
-        self._plugins.update(self._load_plugins(path))
+        self._load_plugins(path)
 
     def _load_plugins(self, path):
         plugin_path = autobob.helpers.abs_path(path)
         LOG.debug('Looking for plugins at {}'.format(plugin_path))
         plugins = {}
+        late_plugins = []
 
         for finder, name, ispkg in pkgutil.walk_packages(path=[plugin_path]):
             if ispkg:
@@ -37,17 +37,19 @@ class Factory(object):
                 LOG.debug('Found classes: {}'.format(classes))
                 for name, cls in classes:
                     if issubclass(cls, autobob.Plugin):
-                        plugins[name] = cls(self)
+                        late_plugins.append((name, cls))
                     elif name in self._config:
-                        plugins[name] = cls(self._config[name])
+                        self._plugins[name] = cls(self._config[name])
                     else:
-                        plugins[name] = cls()
-        return plugins
+                        self._plugins[name] = cls()
+        for name, plugin in late_plugins:
+            self._plugins[name] = plugin(self)
 
     def get(self, plugin):
         if plugin in self._plugins:
             return self._plugins[plugin]
-        raise ImportError('Module does not exist!')
+        raise ImportError('Module {} does not exist amongst '
+                          '{}'.format(plugin, self._plugins.keys()))
         pass
 
     def get_callback(self, func):
