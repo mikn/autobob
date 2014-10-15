@@ -14,3 +14,7 @@ class HelloPlugin(autobob.Plugin):
         if message.author not in self.storage['hello_replies']:
             message.reply('Hi!')
             self.storage['hello_replies'].append(message.author)
+
+    @autobob.always_listen
+    def listen(self, message):
+        pass

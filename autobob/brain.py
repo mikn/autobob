@@ -57,8 +57,9 @@ def boot(factory):
 
         # TODO: make compatible with get_callback pattern used below
         # TODO: warn if you have more than one, refer to @listen decorator
-        for callback in catchalls:
-            matchq.put((100, callback))
+        for func in catchalls:
+            callback = autobob.Callback(func)
+            matchq.put((callback.prio, callback))
 
         autobob.workers.regexq.join()
 

@@ -105,13 +105,11 @@ class Service(object):
         raise NotImplementedError()
 
 
-class Matcher(object):
-    def __init__(self, func, pattern, prio=50, condition=lambda x: True):
+class Callback(object):
+    def __init__(self, func, prio=100):
         self._callback = None
         self._func = func
-        self.pattern = regex.compile(pattern)
         self.prio = prio
-        self.condition = condition
         # TODO: Share lock for all methods on same object
         self.lock = ''
 
@@ -119,3 +117,9 @@ class Matcher(object):
         if not self._callback:
             self._callback = factory.get_callback(self._func)
         return self._callback
+
+class Matcher(Callback):
+    def __init__(self, func, pattern, prio=50, condition=lambda x: True):
+        super().__init__(func, prio)
+        self.pattern = regex.compile(pattern)
+        self.condition = condition

@@ -7,14 +7,10 @@ import autobob.brain
 LOG = logging.getLogger(__name__)
 
 
-def always(func):
-    func.attach_class = True
+def always_listen(func):
+    func._attach_class = True
     autobob.brain.catchalls.append(func)
     return func
-
-
-def listen(func):
-    pass
 
 
 def respond_to(pattern):
