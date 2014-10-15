@@ -11,7 +11,6 @@ import autobob.plugins
 import autobob.config
 
 # TODO: Testing
-# TODO: Configuration
 # TODO: Shelve Plugin
 # TODO: XMPP Plugin
 # TODO: HipChat Plugin

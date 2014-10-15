@@ -35,7 +35,7 @@ def hear(pattern):
 
 
 def _pattern_handler(matcher):
-    matcher._func.attach_class = True
+    matcher._func._attach_class = True
     autobob.brain.matchers.append(matcher)
     LOG.debug('Adding pattern: {} for as a matcher'.format(matcher.pattern))
 
@@ -56,12 +56,3 @@ def scheduled(func,
               day_of_week='*',
               cron_syntax=None):
     pass
-
-
-def plugin(cls):
-    LOG.debug('Iterating over class {}'.format(cls))
-    for name, method in cls.__dict__.items():
-        if hasattr(method, 'attach_class') and method.attach_class:
-            setattr(method, 'class_name', cls.__name__)
-
-    return cls

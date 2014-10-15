@@ -55,7 +55,15 @@ class User(ChatObject):
     pass
 
 
-class Plugin(object):
+class MetaPlugin(type):
+    def __new__(cls, name, bases, namespace, **kwargs):
+        for method in namespace.values():
+            if hasattr(method, '_attach_class'):
+                setattr(method, '_class_name', name)
+        return type.__new__(cls, name, bases, namespace, **kwargs)
+
+
+class Plugin(metaclass=MetaPlugin):
     def __init__(self, factory):
         self._factory = factory
 
