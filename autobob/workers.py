@@ -7,7 +7,11 @@ regexq = queue.Queue()
 
 def regex_worker(matchq):
     while True:
-        matcher, message = regexq.get()
+        data = regexq.get()
+        if not data:
+            regexq.task_done()
+            break
+        matcher, message = data
         LOG.debug('Trying match with regex {}'.format(matcher.pattern))
 
         # We defer the condition matching to the workers knowing that it is

@@ -1,4 +1,3 @@
-import sys
 import multiprocessing
 import queue
 import threading
@@ -26,7 +25,8 @@ def init_threads(workers, args):
     LOG.debug('Setting thread count to: {}.'.format(thread_count))
 
     for i in range(thread_count):
-        t = threading.Thread(target=workers, args=args)
+        thread_name = 'regex_worker-{}'.format(i+1)
+        t = threading.Thread(name=thread_name, target=workers, args=args)
         pool.append(t)
         t.start()
 
@@ -34,17 +34,22 @@ def init_threads(workers, args):
 
 
 def boot(factory):
+    global thread_pool
     storage = factory.get_storage()
 
     thread_pool = init_threads(autobob.workers.regex_worker, (matchq,))
     while True:
         message = messageq.get()
-        LOG.debug('Processing message: {}'.format(message))
         if type(message) is not autobob.Message:
+            if not message:
+                LOG.info('Shutting down brain thread...')
+                messageq.task_done()
+                break
             LOG.warning('Found object in message queue that was not a '
                         'message at all! Type: {}'.format(type(message)))
             continue
 
+        LOG.debug('Processing message: {}'.format(message))
         LOG.debug('Number of matchers: {}'.format(len(matchers)))
 
         for matcher in matchers:
@@ -79,3 +84,14 @@ def boot(factory):
         storage.sync()
         messageq.task_done()
         LOG.debug('Processing done!')
+
+    storage.close()
+
+def shutdown():
+    for thread in thread_pool:
+        LOG.info('Closing thread {}'.format(thread.name))
+        while thread.isAlive():
+            autobob.workers.regexq.put(False)
+            autobob.workers.regexq.join()
+    messageq.put(False)
+    messageq.join()

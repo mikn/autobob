@@ -21,7 +21,10 @@ class StdioService(autobob.Service):
 
     def run(self):
         self._thread.daemon = True
-        self._thread.start()
+        try:
+            self._thread.start()
+        except KeyboardInterrupt:
+            print('Exiting read loop...')
 
     def send_to_room(self, room, message):
         sys.stdout.write(message + '\n')

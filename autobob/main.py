@@ -13,7 +13,6 @@ import autobob.plugins
 import autobob.config
 
 # TODO: Testing
-# TODO: Shelve Plugin
 # TODO: XMPP Plugin
 # TODO: HipChat Plugin
 # TODO: Redis Plugin
@@ -42,11 +41,17 @@ def main():
         args=(factory,)
     )
     LOG.debug('Booting brain!')
-    brain_thread.start()
+    try:
+        brain_thread.start()
 
-    LOG.debug('Starting Service Listener!')
-    service = factory.get_service()
-    service.run()
+        LOG.debug('Starting Service Listener!')
+        service = factory.get_service()
+        service.run()
+        brain_thread.join()
+    except (KeyboardInterrupt, SystemExit):
+        LOG.info('\nI have been asked to quit nicely, and so I will!')
+        autobob.brain.shutdown()
+        sys.exit()
 
 
 if __name__ == '__main__':
