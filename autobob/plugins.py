@@ -67,7 +67,10 @@ class Factory(object):
         return self.get(self._config['service_plugin'])
 
     def get_storage(self):
-        return self.get(self._config['storage_plugin'])
+        storage = self.get(self._config['storage_plugin'])
+        if '_internal' not in storage:
+            storage['_internal'] = {}
+        return storage
 
     def get_config(self):
         return self._config

@@ -12,13 +12,15 @@ import autobob.brain
 import autobob.plugins
 import autobob.config
 
-# TODO: Testing
+# TODO: Catch exceptions in threads to prevent them from dying
+# TODO: Parse for mentions through Service
+# TODO: Share lock for all methods on same object (difficult without
+# performance impact)
 # TODO: XMPP Plugin
 # TODO: HipChat Plugin
 # TODO: Redis Plugin
 # TODO: Scheduler
 # TODO: Plugin folder scaffolding script
-# TODO: Allow bot to reply with more than one handler?
 
 
 def main():

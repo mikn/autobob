@@ -19,6 +19,6 @@ def regex_worker(matchq):
         # performance is offset by the gain of threading
         if matcher.condition(message) and matcher.pattern.match(str(message)):
             LOG.debug('Match found against {}!'.format(matcher.pattern))
-            matchq.put((matcher.prio, matcher))
+            matchq.put((matcher.priority, matcher))
 
         regexq.task_done()

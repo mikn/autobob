@@ -1,4 +1,3 @@
-import functools
 import logging
 
 import autobob
@@ -7,33 +6,37 @@ import autobob.brain
 LOG = logging.getLogger(__name__)
 
 
-def listen(always=False, priority=100):
+def eavesdrop(always=False, priority=1000):
     '''
-    Listen on all messages. If `always` is True, the method will
-    always run no matter if there are other matches or not.
-    If `always` is false, it will run according to the value of priority
-    where lower values are higher priority.
+    Always receive messages. Set priority to autobob.PRIORITY_ALWAYS if you
+    want to catch all messages no matter if there is another match or not.
     '''
+    if always:
+        priority = autobob.PRIORITY_ALWAYS
     def wrapper(func):
         func._attach_class = True
         func._priority = priority
-        autobob.brain.catchalls.append((func, always))
+        autobob.brain.catchalls.append(func)
         return func
     return wrapper
 
 
-def respond_to(pattern, priority=30):
+def respond_to(pattern, always=False, priority=30):
+    if always:
+        priority = autobob.PRIORITY_ALWAYS
     def wrapper(func):
-        cond = lambda m: m.mentions_self()
-        matcher = autobob.Matcher(func, pattern, prio=priority, condition=cond)
+        condition = lambda m: m.mentions_self()
+        matcher = autobob.Matcher(func, pattern, priority=priority, condition=condition)
         _pattern_handler(matcher)
         return func
     return wrapper
 
 
-def hear(pattern, priority=50):
+def hear(pattern, always=False, priority=50):
+    if always:
+        priority = autobob.PRIORITY_ALWAYS
     def wrapper(func):
-        matcher = autobob.Matcher(func, pattern, prio=priority)
+        matcher = autobob.Matcher(func, pattern, priority=priority)
         _pattern_handler(matcher)
         return func
     return wrapper

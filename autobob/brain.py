@@ -55,35 +55,13 @@ def boot(factory):
         for matcher in matchers:
             autobob.workers.regexq.put((matcher, message))
 
-        # TODO: warn if you have more than one that is not "always" with the
-        # same priority
-        for func, always in catchalls:
+        for func in catchalls:
             callback = autobob.Callback(func)
-            if not always:
-                matchq.put((callback.prio, callback))
-            else:
-                callback.get_callback(factory)(message)
+            matchq.put((callback.priority, callback))
 
         autobob.workers.regexq.join()
 
-        try:
-            _, matcher = matchq.get_nowait()
-            callback = matcher.get_callback(factory)
-            callback(message)
-            with matchq.mutex:
-                matchq.queue.clear()
-        except ImportError:
-            LOG.warning('Removing matcher with regex {} and method: {}. I can '
-                        'however not tell you which class it comes from...'
-                        ''.format(matcher.pattern, matcher._func.__name__))
-            del(matchers[matchers.index(matcher)])
-        except queue.Empty:
-            pass
-        except Exception as e:
-            LOG.error(e)
-            # TODO: We probably want to print the debug in the "home" channel
-            # and perhaps a "sorry" where the message came from unless admin
-            pass
+        run_callbacks(factory, storage, message)
 
         storage.sync()
         messageq.task_done()
@@ -99,3 +77,30 @@ def shutdown():
             autobob.workers.regexq.join()
     messageq.put(False)
     messageq.join()
+
+def run_callbacks(factory, storage, message):
+    try:
+        while True:
+            priority, matcher = matchq.get_nowait()
+            callback = matcher.get_callback(factory)
+            callback(message)
+            if priority <= autobob.PRIORITY_ALWAYS:
+                continue
+            with matchq.mutex:
+                matchq.queue.clear()
+    except ImportError:
+        LOG.warning('Removing matcher with regex {} and method: {} from class '
+                    '{} because it broke, and I don\'t like rude toys.'.format(
+                        matcher.pattern,
+                        matcher._func.__name__,
+                        matcher.__func__._class_name))
+        del(matchers[matchers.index(matcher)])
+    except queue.Empty:
+        pass
+    except Exception as e:
+        LOG.error(e)
+        storage['_internal']['last_error'] = e
+        message.reply('Ouch! That went straight to the brain! '
+                      'Judging by the mechanics involved it will '
+                      'probably happen if you try again as well... '
+                      'so please don\'t...')

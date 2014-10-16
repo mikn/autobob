@@ -4,7 +4,7 @@ import autobob
 class HelloPlugin(autobob.Plugin):
 
     def __init__(self, factory):
-        autobob.Plugin.__init__(self, factory)
+        super().__init__(factory)
         if not 'hello_replies' in self.storage:
             self.storage['hello_replies'] = []
 
@@ -15,6 +15,6 @@ class HelloPlugin(autobob.Plugin):
             message.reply('Hi!')
             self.storage['hello_replies'].append(message.author)
 
-    @autobob.always_listen
+    @autobob.eavesdrop(always=True)
     def listen(self, message):
         pass

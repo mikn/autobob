@@ -13,6 +13,9 @@ LOG.addHandler(error_handler)
 
 from .decorators import *
 
+## CONSTANTS
+PRIORITY_ALWAYS = -1
+
 
 class Message(object):
     def __init__(self, message, author, reply_path=None):
@@ -20,7 +23,6 @@ class Message(object):
         self._message = message
         self._author = author
         self._reply_path = reply_path
-        # TODO: Parse for mentions through Service
         self._mentions = ['botname']
 
     def mentions(self, username):
@@ -85,7 +87,10 @@ class Plugin(metaclass=MetaPlugin):
 
 class Storage(collections.UserDict):
     def sync(self):
-        pass
+        raise NotImplementedError()
+
+    def close(self):
+        raise NotImplementedError()
 
 
 class Service(object):
@@ -106,13 +111,12 @@ class Service(object):
 
 
 class Callback(object):
-    def __init__(self, func, prio=100):
+    def __init__(self, func, priority=100):
         self._callback = None
         self._func = func
-        self.prio = prio
+        self.priority = priority
         if hasattr(func, '_priority'):
-            self.prio = func._priority
-        # TODO: Share lock for all methods on same object
+            self.priority = func._priority
         self.lock = ''
 
     def get_callback(self, factory):
@@ -121,7 +125,7 @@ class Callback(object):
         return self._callback
 
 class Matcher(Callback):
-    def __init__(self, func, pattern, prio=50, condition=lambda x: True):
-        super().__init__(func, prio)
+    def __init__(self, func, pattern, priority=50, condition=lambda x: True):
+        super().__init__(func, priority)
         self.pattern = regex.compile(pattern)
         self.condition = condition
