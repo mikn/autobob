@@ -4,12 +4,10 @@ autobob
 A chat bot designed (almost) like a software project!
 
 
-Requirements
-======
+##Requirements
 Python 3.4+ (ohmygod venv)
 
-Installing!
-======
+##Installing!
 
 Even now it is rather simple, make sure you create a venv first
 
