@@ -49,7 +49,11 @@ def main():
         LOG.debug('Starting Service Listener!')
         service = factory.get_service()
         service.run()
+
+        # Make sure the main thread is blocking so we can catch the interrupt
+        # event
         brain_thread.join()
+
     except (KeyboardInterrupt, SystemExit):
         LOG.info('\nI have been asked to quit nicely, and so I will!')
         autobob.brain.shutdown()

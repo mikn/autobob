@@ -54,11 +54,7 @@ class Factory(object):
 
     def get_callback(self, func):
         if not hasattr(func, '_class_name'):
-            log.warning('Sadly, due to the nature of how methods are wrapped '
-                        'in python we must do some sorcery with a class '
-                        'decorator as well. You must in other words decorate '
-                        'your plugin class with @autobob.plugin for it '
-                        'to be compatible.')
+            LOG.warning('Something went terribly wrong here!')
             raise ImportError()
         obj = self.get(func._class_name)
         return getattr(obj, func.__name__)
@@ -74,3 +70,6 @@ class Factory(object):
 
     def get_config(self):
         return self._config
+
+    def get_message(self):
+        return autobob.Message(self)

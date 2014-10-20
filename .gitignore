@@ -58,3 +58,6 @@ target/
 
 # VIM stuff
 *.sw[n-p]
+
+# Ignore shelve file
+/shelve.*

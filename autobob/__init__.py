@@ -18,12 +18,15 @@ PRIORITY_ALWAYS = -1
 
 
 class Message(object):
-    def __init__(self, message, author, reply_path=None):
+    def __init__(self, message, author, reply_path=None, mention_parse=None):
         assert issubclass(type(reply_path), ChatObject)
         self._message = message
         self._author = author
         self._reply_path = reply_path
-        self._mentions = ['botname']
+        if not mention_parse:
+            self._mentions = []
+        else:
+            self._mentions = mention_parse(self._message)
 
     def mentions(self, username):
         return username in self._mentions
