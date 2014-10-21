@@ -19,7 +19,7 @@ class StdioService(autobob.Service):
                             self.send_to_room)
 
         def mention_parse(message):
-            matches = self._mention_match.match_all(message)
+            matches = self._mention_match.search(message)
             if matches:
                 return ['botname']
             else:
@@ -28,7 +28,7 @@ class StdioService(autobob.Service):
         for line in sys.stdin:
             msg = autobob.Message(line,
                                   'system',
-                                  return_path=room,
+                                  reply_path=room,
                                   mention_parse=mention_parse)
             autobob.brain.messageq.put(msg)
 

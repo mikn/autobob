@@ -6,20 +6,9 @@ regexq = queue.Queue()
 
 
 def regex_worker(matchq):
-    leave = True
-    while not leave:
-        try:
-            leave = regex_loop(matchq)
-        except Exception as e:
-            LOG.warning('Something broke horribly, which is a bit sad. '
-                        'Error message I received was {}...'
-                        'Resurrecting thread!'.format(e))
-
-
-def regex_loop(matchq):
     while True:
         data = regexq.get()
-        if not data:
+        if not data or not len(data) == 2:
             regexq.task_done()
             return True
         matcher, message = data
