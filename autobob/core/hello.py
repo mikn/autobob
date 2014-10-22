@@ -8,8 +8,8 @@ class HelloPlugin(autobob.Plugin):
         if not 'hello_replies' in self.storage:
             self.storage['hello_replies'] = []
 
-    @autobob.respond_to('^(H|h)i,? botname')
-    @autobob.respond_to('^(H|h)ello,? botname')
+    @autobob.respond_to('^(H|h)i,? ({mention_name})')
+    @autobob.respond_to('^(H|h)ello,? ({mention_name})')
     def hi(self, message):
         if message.author not in self.storage['hello_replies']:
             message.reply('Hi!')

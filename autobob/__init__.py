@@ -15,6 +15,7 @@ from .decorators import *
 
 ## CONSTANTS
 PRIORITY_ALWAYS = -1
+SELF_MENTION = 'SELF_MENTION'
 
 
 class Message(object):
@@ -32,7 +33,7 @@ class Message(object):
         return username in self._mentions
 
     def mentions_self(self):
-        return 'botname' in self._mentions
+        return SELF_MENTION in self._mentions
 
     def reply(self, message):
         LOG.debug('Sending message {} to appropriate places..'.format(message))
@@ -52,7 +53,7 @@ class ChatObject(object):
 
 
 class Room(ChatObject):
-    def __init__(self, name, topic, roster, reply_path):
+    def __init__(self, name, topic=None, roster=None, reply_path=None):
         self._roster = roster
         self._topic = topic
         self._reply_path = reply_path
@@ -97,8 +98,8 @@ class Storage(collections.UserDict):
 
 
 class Service(object):
-    def __init__(self):
-        pass
+    def __init__(self, config=None):
+        self._config = config
 
     def run(self):
         raise NotImplementedError()
@@ -111,6 +112,13 @@ class Service(object):
 
     def send_message(self, message):
         raise NotImplementedError()
+
+    @property
+    def mention_name(self):
+        if 'mention_name' in self._config:
+            return self._config['mention_name']
+        else:
+            return None
 
 
 class Callback(object):
@@ -127,8 +135,13 @@ class Callback(object):
             self._callback = factory.get_callback(self._func)
         return self._callback
 
+
 class Matcher(Callback):
     def __init__(self, func, pattern, priority=50, condition=lambda x: True):
         super().__init__(func, priority)
-        self.pattern = regex.compile(pattern)
+        self.pattern = pattern
         self.condition = condition
+        self.regex = None
+
+    def compile(self, **format_args):
+        self.regex = regex.compile(self.pattern.format(**format_args))

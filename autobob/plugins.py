@@ -25,8 +25,10 @@ class Factory(object):
         for finder, name, ispkg in pkgutil.walk_packages(path=[plugin_path]):
             if ispkg:
                 continue
+
             full_name = 'autobob.core.{}'.format(name)
             LOG.debug('Found plugin: {}'.format(name))
+
             if full_name not in sys.modules:
                 LOG.debug('Importing plugin: {}'.format(name))
                 module = finder.find_module(full_name
@@ -34,14 +36,26 @@ class Factory(object):
                 classes = inspect.getmembers(module, inspect.isclass)
                 LOG.debug('Found classes: {}'.format(classes))
                 for name, cls in classes:
+                    plugin_config = self._get_plugin_config(cls, name)
                     if issubclass(cls, autobob.Plugin):
                         late_plugins.append((name, cls))
-                    elif name in self._config:
-                        self._plugins[name] = cls(self._config[name])
+                    elif plugin_config:
+                        self._plugins[name] = cls(plugin_config)
                     else:
                         self._plugins[name] = cls()
+
         for name, plugin in late_plugins:
             self._plugins[name] = plugin(self)
+
+    def _get_plugin_config(self, cls, name):
+        config = {}
+        for base in cls.__bases__:
+            if base.__name__ in self._config:
+                config = self._config[base.__name__]
+        if name in self._config:
+            config.update(self._config[name])
+
+        return config
 
     def get(self, plugin):
         if plugin in self._plugins:
@@ -68,6 +82,3 @@ class Factory(object):
 
     def get_config(self):
         return self._config
-
-    def get_message(self):
-        return autobob.Message(self)

@@ -11,13 +11,19 @@ from . import brain
 from . import plugins
 from . import config
 
-# TODO: Share lock for all methods on same object (difficult without
-# performance impact)
+# TODO: Read an ACTUAL configuration file
+# TODO: Scheduler
 # TODO: XMPP Plugin
 # TODO: HipChat Plugin
-# TODO: Redis Plugin
-# TODO: Scheduler
 # TODO: Plugin folder scaffolding script
+# TODO: Documentation
+# TODO: Redis Plugin
+# TODO: Format {} shorthands in plugins
+# TODO: Core Admin Plugin
+# TODO: ACL..?
+# TODO: Nicer CLI than logger?
+# TODO: Share lock for all methods on same object (difficult without
+# performance impact)
 
 
 def main():
@@ -47,8 +53,9 @@ def main():
         service = factory.get_service()
         service.run()
 
+        [m.compile(mention_name=service.mention_name) for m in brain.matchers]
+
         # Make sure the main thread is blocking so we can catch the interrupt
-        # event
         brain_thread.join()
 
     except (KeyboardInterrupt, SystemExit):

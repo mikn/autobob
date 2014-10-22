@@ -7,5 +7,8 @@ defaults = {
     'core_path': os.path.join(autobob.__path__.pop(), 'core'),
     'ShelveStorage': {
         'path': './shelve'
-    }
+    },
+    'Service': {
+        'mention_name': 'bob',
+    },
 }

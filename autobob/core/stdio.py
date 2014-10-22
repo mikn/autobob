@@ -8,22 +8,25 @@ LOG = logging.getLogger(__name__)
 
 
 class StdioService(autobob.Service):
-    def __init__(self):
+    def __init__(self, config):
         self._thread = threading.Thread(name='service', target=self._loop)
-        self._mention_match = regex.compile('botname')
+        self._config = config
 
     def _loop(self):
+        roster = [self._config['mention_name'], 'input']
         room = autobob.Room('stdin',
-                            'stdin fake room',
-                            ['botname', 'mikn'],
-                            self.send_to_room)
+                            topic='stdin fake room',
+                            roster=roster,
+                            reply_path=self.send_to_room)
 
         def mention_parse(message):
-            matches = self._mention_match.search(message)
-            if matches:
-                return ['botname']
-            else:
-                return []
+            matches = [u for u in roster if u in message]
+            mention_name = self._config['mention_name']
+            if mention_name in matches:
+                self_index = matches.index(mention_name)
+                matches[self_index] = autobob.SELF_MENTION
+
+            return matches
 
         for line in sys.stdin:
             msg = autobob.Message(line,

@@ -53,7 +53,7 @@ def hear(pattern, always=False, priority=50):
 def _pattern_handler(matcher):
     matcher._func._attach_class = True
     brain.matchers.append(matcher)
-    LOG.debug('Adding pattern: {} for as a matcher'.format(matcher.pattern))
+    LOG.debug('Adding pattern: {} as a matcher'.format(matcher.pattern))
 
 
 def randomly(func,
