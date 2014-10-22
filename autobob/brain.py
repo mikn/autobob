@@ -6,7 +6,7 @@ import logging
 LOG = logging.getLogger(__name__)
 
 import autobob
-import autobob.workers
+from . import workers
 
 catchalls = []
 matchers = []
@@ -15,7 +15,7 @@ messageq = queue.Queue()
 thread_pool = []
 
 
-def init_threads(workers, args):
+def init_threads(worker, args):
     pool = []
     try:
         thread_count = multiprocessing.cpu_count()*2
@@ -26,7 +26,7 @@ def init_threads(workers, args):
 
     for i in range(thread_count):
         thread_name = 'regex_worker-{}'.format(i+1)
-        t = threading.Thread(name=thread_name, target=workers, args=args)
+        t = threading.Thread(name=thread_name, target=worker, args=args)
         pool.append(t)
         t.start()
 
@@ -37,7 +37,7 @@ def boot(factory):
     global thread_pool
     storage = factory.get_storage()
 
-    thread_pool = init_threads(autobob.workers.regex_worker, (matchq,))
+    thread_pool = init_threads(workers.regex_worker, (matchq,))
     while True:
         message = messageq.get()
         if type(message) is not autobob.Message:
@@ -53,13 +53,13 @@ def boot(factory):
         LOG.debug('Number of matchers: {}'.format(len(matchers)))
 
         for matcher in matchers:
-            autobob.workers.regexq.put((matcher, message))
+            workers.regexq.put((matcher, message))
 
         for func in catchalls:
             callback = autobob.Callback(func)
             matchq.put((callback.priority, callback))
 
-        autobob.workers.regexq.join()
+        workers.regexq.join()
 
         run_callbacks(factory, storage, message)
 
@@ -69,14 +69,16 @@ def boot(factory):
 
     storage.close()
 
+
 def shutdown():
     for thread in thread_pool:
         LOG.info('Closing thread {}'.format(thread.name))
         while thread.isAlive():
-            autobob.workers.regexq.put(False)
-            autobob.workers.regexq.join()
+            workers.regexq.put(False)
+            workers.regexq.join()
     messageq.put(False)
     messageq.join()
+
 
 def run_callbacks(factory, storage, message):
     try:

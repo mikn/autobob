@@ -1,12 +1,11 @@
-import os.path
 import inspect
 import pkgutil
 import logging
 import sys
 
 import autobob
-import autobob.core
-import autobob.helpers
+from . import core # NOQA - ignoring this error because we do some import magic
+from . import helpers
 
 LOG = logging.getLogger(__name__)
 
@@ -19,9 +18,8 @@ class Factory(object):
         self._load_plugins(path)
 
     def _load_plugins(self, path):
-        plugin_path = autobob.helpers.abs_path(path)
+        plugin_path = helpers.abs_path(path)
         LOG.debug('Looking for plugins at {}'.format(plugin_path))
-        plugins = {}
         late_plugins = []
 
         for finder, name, ispkg in pkgutil.walk_packages(path=[plugin_path]):

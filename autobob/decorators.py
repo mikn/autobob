@@ -1,7 +1,7 @@
 import logging
 
 import autobob
-import autobob.brain
+from . import brain
 
 LOG = logging.getLogger(__name__)
 
@@ -13,10 +13,11 @@ def eavesdrop(always=False, priority=1000):
     '''
     if always:
         priority = autobob.PRIORITY_ALWAYS
+
     def wrapper(func):
         func._attach_class = True
         func._priority = priority
-        autobob.brain.catchalls.append(func)
+        brain.catchalls.append(func)
         return func
     return wrapper
 
@@ -24,9 +25,15 @@ def eavesdrop(always=False, priority=1000):
 def respond_to(pattern, always=False, priority=30):
     if always:
         priority = autobob.PRIORITY_ALWAYS
+
     def wrapper(func):
-        condition = lambda m: m.mentions_self()
-        matcher = autobob.Matcher(func, pattern, priority=priority, condition=condition)
+        def condition(message):
+            return message.mentions_self()
+
+        matcher = autobob.Matcher(func,
+                                  pattern,
+                                  priority=priority,
+                                  condition=condition)
         _pattern_handler(matcher)
         return func
     return wrapper
@@ -35,6 +42,7 @@ def respond_to(pattern, always=False, priority=30):
 def hear(pattern, always=False, priority=50):
     if always:
         priority = autobob.PRIORITY_ALWAYS
+
     def wrapper(func):
         matcher = autobob.Matcher(func, pattern, priority=priority)
         _pattern_handler(matcher)
@@ -44,7 +52,7 @@ def hear(pattern, always=False, priority=50):
 
 def _pattern_handler(matcher):
     matcher._func._attach_class = True
-    autobob.brain.matchers.append(matcher)
+    brain.matchers.append(matcher)
     LOG.debug('Adding pattern: {} for as a matcher'.format(matcher.pattern))
 
 

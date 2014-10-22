@@ -1,6 +1,5 @@
+import os.path
 import sys
-import signal
-import time
 import threading
 import logging
 import toml
@@ -8,12 +7,10 @@ import toml
 LOG = logging.getLogger(__name__)
 
 import autobob
-import autobob.brain
-import autobob.plugins
-import autobob.config
+from . import brain
+from . import plugins
+from . import config
 
-# TODO: Catch exceptions in threads to prevent them from dying
-# TODO: Parse for mentions through Service
 # TODO: Share lock for all methods on same object (difficult without
 # performance impact)
 # TODO: XMPP Plugin
@@ -29,7 +26,7 @@ def main():
     f = ''
 
     config = autobob.config.defaults
-    if f and exists(f):
+    if f and os.path.exists(f):
         LOG.debug('Reading configuration file from {}!'.format(f))
         with open(f) as conf:
             config.update(toml.loads(conf))
