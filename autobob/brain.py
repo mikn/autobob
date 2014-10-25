@@ -55,8 +55,7 @@ def boot(factory):
         for matcher in matchers:
             workers.regexq.put((matcher, message))
 
-        for func in catchalls:
-            callback = autobob.Callback(func)
+        for callback in catchalls:
             matchq.put((callback.priority, callback))
 
         workers.regexq.join()

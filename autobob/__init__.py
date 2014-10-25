@@ -12,6 +12,8 @@ error_handler.setLevel(logging.ERROR)
 LOG.addHandler(error_handler)
 
 from .decorators import *
+from . import core
+from . import plugins
 
 ## CONSTANTS
 PRIORITY_ALWAYS = -1

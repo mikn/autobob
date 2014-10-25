@@ -17,7 +17,8 @@ def eavesdrop(always=False, priority=1000):
     def wrapper(func):
         func._attach_class = True
         func._priority = priority
-        brain.catchalls.append(func)
+        callback = autobob.Callback(func)
+        brain.catchalls.append(callback)
         return func
     return wrapper
 

@@ -7,12 +7,12 @@ import toml
 LOG = logging.getLogger(__name__)
 
 import autobob
+import autobob.config
 from . import brain
-from . import plugins
-from . import config
 
 # TODO: Read an ACTUAL configuration file
 # TODO: Scheduler
+# TODO: Live plugin reloads using inotify
 # TODO: XMPP Plugin
 # TODO: HipChat Plugin
 # TODO: Plugin folder scaffolding script

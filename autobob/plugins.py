@@ -4,7 +4,6 @@ import logging
 import sys
 
 import autobob
-from . import core # NOQA - ignoring this error because we do some import magic
 from . import helpers
 
 LOG = logging.getLogger(__name__)
@@ -26,6 +25,7 @@ class Factory(object):
             if ispkg:
                 continue
 
+            # TODO: Make sure the plugins are loaded in the correct namespace
             full_name = 'autobob.core.{}'.format(name)
             LOG.debug('Found plugin: {}'.format(name))
 
