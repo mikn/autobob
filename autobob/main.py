@@ -9,6 +9,7 @@ LOG = logging.getLogger(__name__)
 import autobob
 import autobob.config
 from . import brain
+from . import scheduler
 
 # TODO: Read an ACTUAL configuration file
 # TODO: Scheduler
@@ -42,14 +43,23 @@ def main():
 
     brain_thread = threading.Thread(
         name='brain',
-        target=autobob.brain.boot,
+        target=brain.boot,
         args=(factory,)
     )
+
+    timer_thread = threading.Thread(
+        name='timer',
+        target=scheduler.timer_thread
+    )
+
     LOG.debug('Booting brain!')
     try:
         brain_thread.start()
 
-        LOG.debug('Starting Service Listener!')
+        LOG.debug('Revving up timer thread!')
+        timer_thread.start()
+
+        LOG.debug('Starting service listener!')
         service = factory.get_service()
         service.run()
 
@@ -57,10 +67,12 @@ def main():
 
         # Make sure the main thread is blocking so we can catch the interrupt
         brain_thread.join()
+        timer_thread.join()
 
     except (KeyboardInterrupt, SystemExit):
         LOG.info('\nI have been asked to quit nicely, and so I will!')
-        autobob.brain.shutdown()
+        brain.shutdown()
+        scheduler.shutdown()
         sys.exit()
 
 

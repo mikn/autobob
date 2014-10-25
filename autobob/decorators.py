@@ -1,7 +1,9 @@
 import logging
+import croniter
 
 import autobob
 from . import brain
+from . import scheduler
 
 LOG = logging.getLogger(__name__)
 
@@ -72,4 +74,14 @@ def scheduled(func,
               month='*',
               day_of_week='*',
               cron_syntax=None):
-    pass
+    if not cron_syntax:
+        cron_syntax = '{} {} {} {} {}'.format(
+            minutes,
+            hours,
+            day_of_month,
+            month,
+            day_of_week
+        )
+    cron = croniter.cron(cron_syntax)
+    callback = autobob.ScheduledCallback(func, cron)
+    scheduler.scheduleq.put(callback)

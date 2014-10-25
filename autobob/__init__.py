@@ -1,4 +1,5 @@
 import collections
+import datetime
 import sys
 import logging
 import regex
@@ -14,6 +15,7 @@ LOG.addHandler(error_handler)
 from .decorators import *
 from . import core
 from . import plugins
+from . import scheduler
 
 ## CONSTANTS
 PRIORITY_ALWAYS = -1
@@ -147,3 +149,14 @@ class Matcher(Callback):
 
     def compile(self, **format_args):
         self.regex = regex.compile(self.pattern.format(**format_args))
+
+
+class ScheduledCallback(Callback):
+    def __init__(self, func, cron):
+        self._cron = cron
+        self.get_next()
+        super().__init__(func, self.timestamp)
+
+    def get_next(self):
+        self.timestamp = self._cron.get_next(datetime.datetime).timestamp()
+        return self.timestamp
