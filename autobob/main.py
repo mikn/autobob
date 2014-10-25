@@ -49,7 +49,8 @@ def main():
 
     timer_thread = threading.Thread(
         name='timer',
-        target=scheduler.timer_thread
+        target=scheduler.timer_thread,
+        args=(factory,)
     )
 
     LOG.debug('Booting brain!')

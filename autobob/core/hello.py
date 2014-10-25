@@ -5,7 +5,7 @@ class HelloPlugin(autobob.Plugin):
 
     def __init__(self, factory):
         super().__init__(factory)
-        if not 'hello_replies' in self.storage:
+        if 'hello_replies' not in self.storage:
             self.storage['hello_replies'] = []
 
     @autobob.respond_to('^(H|h)i,? ({mention_name})')
@@ -18,3 +18,7 @@ class HelloPlugin(autobob.Plugin):
     @autobob.eavesdrop(always=True)
     def listen(self, message):
         pass
+
+    @autobob.scheduled(minutes='*/1')
+    def be_obnoxious(self):
+        self.default_room.say('Echo on a clock!')

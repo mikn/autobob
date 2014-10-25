@@ -11,4 +11,7 @@ defaults = {
     'Service': {
         'mention_name': 'bob',
     },
+    'StdioService': {
+        'rooms': ['stdin'],
+    },
 }

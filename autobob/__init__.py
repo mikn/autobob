@@ -58,8 +58,9 @@ class ChatObject(object):
 
 class Room(ChatObject):
     def __init__(self, name, topic=None, roster=None, reply_path=None):
-        self._roster = roster
-        self._topic = topic
+        self.name = name
+        self.roster = roster
+        self.topic = topic
         self._reply_path = reply_path
 
     def say(self, message):
@@ -89,6 +90,10 @@ class Plugin(metaclass=MetaPlugin):
         self.storage = storage[name]
 
     @property
+    def default_room(self):
+        return self._factory.get_service().default_room
+
+    @property
     def service(self):
         return self._factory.get_service()
 
@@ -104,9 +109,11 @@ class Storage(collections.UserDict):
 class Service(object):
     def __init__(self, config=None):
         self._config = config
+        self._default_room = None
 
     def run(self):
-        raise NotImplementedError()
+        if 'rooms' not in self._config:
+            raise Exception('No rooms to join defined!')
 
     def join_room(self, room):
         raise NotImplementedError()
@@ -116,6 +123,15 @@ class Service(object):
 
     def send_message(self, message):
         raise NotImplementedError()
+
+    @property
+    def default_room(self):
+        if not self._default_room:
+            room_name = self._config['rooms'][0]
+            if 'default_room' in self._config:
+                room_name = self._config['default_room']
+            self._default_room = self.get_room(room_name)
+        return self._default_room
 
     @property
     def mention_name(self):

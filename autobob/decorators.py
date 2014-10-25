@@ -67,21 +67,23 @@ def randomly(func,
     pass
 
 
-def scheduled(func,
-              minutes='*',
+def scheduled(minutes='*',
               hours='*',
               day_of_month='*',
               month='*',
               day_of_week='*',
-              cron_syntax=None):
-    if not cron_syntax:
-        cron_syntax = '{} {} {} {} {}'.format(
+              cron_str=None):
+    def wrapper(func):
+        cron_str = '{} {} {} {} {}'.format(
             minutes,
             hours,
             day_of_month,
             month,
             day_of_week
         )
-    cron = croniter.cron(cron_syntax)
-    callback = autobob.ScheduledCallback(func, cron)
-    scheduler.scheduleq.put(callback)
+        func._attach_class = True
+        cron = croniter.croniter(cron_str)
+        callback = autobob.ScheduledCallback(func, cron)
+        scheduler.scheduleq.put(callback)
+        return func
+    return wrapper
