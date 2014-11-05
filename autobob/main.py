@@ -12,7 +12,6 @@ from . import brain
 from . import scheduler
 
 # TODO: Read an ACTUAL configuration file
-# TODO: Scheduler
 # TODO: Live plugin reloads using inotify
 # TODO: XMPP Plugin
 # TODO: HipChat Plugin
@@ -50,14 +49,14 @@ def main():
     timer_thread = threading.Thread(
         name='timer',
         target=scheduler.timer_thread,
-        args=(factory,)
+        args=(factory, config.get('scheduler_resolution'))
     )
 
     LOG.debug('Booting brain!')
     try:
         brain_thread.start()
 
-        LOG.debug('Revving up timer thread!')
+        LOG.debug('Revving up the scheduler!')
         timer_thread.start()
 
         LOG.debug('Starting service listener!')

@@ -1,4 +1,5 @@
-import asyncio
+import bisect
+import math
 import logging
 import queue
 import time
@@ -8,45 +9,52 @@ LOG = logging.getLogger(__name__)
 scheduleq = queue.Queue()
 
 
-def timer_thread(factory):
-    loop = asyncio.new_event_loop()
-    loop.call_later(1, check_queue, loop, factory)
-    loop.run_forever()
-    loop.close()
+def timer_thread(factory, resolution):
+    scheduled_events = []
+    LOG.debug('Setting loops per second to: %.2f', 1 / resolution)
+    while True:
+        bt = time.monotonic()
+        unix_time = time.time()
+        _process_event(factory, scheduled_events, unix_time, resolution)
+        try:
+            event = scheduleq.get_nowait()
+            if not event:
+                scheduleq.task_done()
+                break
+            _schedule_event(event, scheduled_events)
+            scheduleq.task_done()
+        except queue.Empty:
+            pass
+        time_spent = time.monotonic() - bt
+        # TODO Make sure that we sync to time.time
+        sleep_time = resolution - math.fmod(unix_time + time_spent, resolution)
+        if sleep_time < 0:
+            sleep_time = 0
+        time.sleep(sleep_time)
 
 
 def shutdown():
-    LOG.debug('Shutting down scheduler...')
     scheduleq.put(False)
 
 
-# TODO: Move this logic to a coroutine instead perhaps?
-def check_queue(loop, factory):
-    try:
-        event = scheduleq.get_nowait()
-        if not event:
-            loop.stop()
-            scheduleq.task_done()
-            return
-        schedule(loop, event, factory)
-        scheduleq.task_done()
-    except queue.Empty:
-        pass
-
-    loop.call_later(1, check_queue, loop, factory)
-
-
-def schedule(loop, event, factory):
-    unixtime = time.time()
-    diff = event.timestamp - unixtime
-    call_at = loop.time() + diff
-    LOG.debug('Adding callback with timestamp: {}'.format(int(event.timestamp)))
-    LOG.debug('T minus {} seconds.'.format(round(diff)))
-    loop.call_at(call_at, event_callback, loop, event, factory)
+def _process_event(factory, scheduled_events, unix_time, resolution):
+    '''
+    This is a separate method, mainly because I did not want to wrap the entire
+    block in an if-statement if the scheduled_events would be empty.
+    '''
+    if not scheduled_events:
+        return True
+    exec_time = scheduled_events[0].timestamp
+    if unix_time >= exec_time:
+        event = scheduled_events.pop(0)
+        LOG.debug('Running scheduled event %s at: %d', event, unix_time)
+        callback = event.get_callback(factory)
+        callback()
+        event.get_next()
+        _schedule_event(event, scheduled_events)
 
 
-def event_callback(loop, event, factory):
-    LOG.debug('Calling callback with timestamp: {}'.format(int(event.timestamp)))
-    event.get_callback(factory)()
-    event.get_next()
-    schedule(loop, event, factory)
+def _schedule_event(event, scheduled_events):
+    LOG.debug('Scheduling event %s to happen at: %d', event, event.timestamp)
+    loc = bisect.bisect_left(scheduled_events, event)
+    scheduled_events.insert(loc, event)
