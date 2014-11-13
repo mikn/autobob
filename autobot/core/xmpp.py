@@ -1,8 +1,8 @@
-import autobob
+import autobot
 import sleekxmpp
 
 
-class XMPPService(autobob.Service):
+class XMPPService(autobot.Service):
     pass
 
 

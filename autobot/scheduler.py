@@ -26,7 +26,7 @@ def timer_thread(factory, resolution):
         except queue.Empty:
             pass
         time_spent = time.monotonic() - bt
-        # TODO Make sure that we sync to time.time
+        # Make the loop tick on .0 unix time for style points
         sleep_time = resolution - math.fmod(unix_time + time_spent, resolution)
         if sleep_time < 0:
             sleep_time = 0

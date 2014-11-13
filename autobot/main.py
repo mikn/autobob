@@ -6,16 +6,18 @@ import toml
 
 LOG = logging.getLogger(__name__)
 
-import autobob
-import autobob.config
+import autobot
+import autobot.config
 from . import brain
 from . import scheduler
 
+# TODO: Testing using Behave
+# TODO: Documentation using Sphinx
 # TODO: Read an ACTUAL configuration file
+# TODO: Plugin folder scaffolding script
 # TODO: Live plugin reloads using inotify
 # TODO: XMPP Plugin
 # TODO: HipChat Plugin
-# TODO: Plugin folder scaffolding script
 # TODO: Documentation
 # TODO: Redis Plugin
 # TODO: Format {} shorthands in plugins
@@ -27,18 +29,18 @@ from . import scheduler
 
 
 def main():
-    logging.getLogger('autobob').setLevel(logging.DEBUG)
+    logging.getLogger('autobot').setLevel(logging.DEBUG)
 
     f = ''
 
-    config = autobob.config.defaults
+    config = autobot.config.defaults
     if f and os.path.exists(f):
         LOG.debug('Reading configuration file from {}!'.format(f))
         with open(f) as conf:
             config.update(toml.loads(conf))
 
     LOG.debug('Importing plugins!')
-    factory = autobob.plugins.Factory(config)
+    factory = autobot.plugins.Factory(config)
 
     brain_thread = threading.Thread(
         name='brain',

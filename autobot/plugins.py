@@ -3,7 +3,7 @@ import pkgutil
 import logging
 import sys
 
-import autobob
+import autobot
 from . import helpers
 
 LOG = logging.getLogger(__name__)
@@ -26,7 +26,7 @@ class Factory(object):
                 continue
 
             # TODO: Make sure the plugins are loaded in the correct namespace
-            full_name = 'autobob.core.{}'.format(name)
+            full_name = 'autobot.core.{}'.format(name)
             LOG.debug('Found plugin: {}'.format(name))
 
             if full_name not in sys.modules:
@@ -37,7 +37,7 @@ class Factory(object):
                 LOG.debug('Found classes: {}'.format(classes))
                 for name, cls in classes:
                     plugin_config = self._get_plugin_config(cls, name)
-                    if issubclass(cls, autobob.Plugin):
+                    if issubclass(cls, autobot.Plugin):
                         late_plugins.append((name, cls))
                     elif plugin_config:
                         self._plugins[name] = cls(plugin_config)

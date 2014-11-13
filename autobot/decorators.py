@@ -1,7 +1,7 @@
 import logging
 import croniter
 
-import autobob
+import autobot
 from . import brain
 from . import scheduler
 
@@ -10,16 +10,16 @@ LOG = logging.getLogger(__name__)
 
 def eavesdrop(always=False, priority=1000):
     '''
-    Always receive messages. Set priority to autobob.PRIORITY_ALWAYS if you
+    Always receive messages. Set priority to autobot.PRIORITY_ALWAYS if you
     want to catch all messages no matter if there is another match or not.
     '''
     if always:
-        priority = autobob.PRIORITY_ALWAYS
+        priority = autobot.PRIORITY_ALWAYS
 
     def wrapper(func):
         func._attach_class = True
         func._priority = priority
-        callback = autobob.Callback(func)
+        callback = autobot.Callback(func)
         brain.catchalls.append(callback)
         return func
     return wrapper
@@ -27,13 +27,13 @@ def eavesdrop(always=False, priority=1000):
 
 def respond_to(pattern, always=False, priority=30):
     if always:
-        priority = autobob.PRIORITY_ALWAYS
+        priority = autobot.PRIORITY_ALWAYS
 
     def wrapper(func):
         def condition(message):
             return message.mentions_self()
 
-        matcher = autobob.Matcher(func,
+        matcher = autobot.Matcher(func,
                                   pattern,
                                   priority=priority,
                                   condition=condition)
@@ -44,10 +44,10 @@ def respond_to(pattern, always=False, priority=30):
 
 def hear(pattern, always=False, priority=50):
     if always:
-        priority = autobob.PRIORITY_ALWAYS
+        priority = autobot.PRIORITY_ALWAYS
 
     def wrapper(func):
-        matcher = autobob.Matcher(func, pattern, priority=priority)
+        matcher = autobot.Matcher(func, pattern, priority=priority)
         _pattern_handler(matcher)
         return func
     return wrapper
@@ -83,7 +83,7 @@ def scheduled(minutes='*',
         )
         func._attach_class = True
         cron = croniter.croniter(cron_str)
-        callback = autobob.ScheduledCallback(func, cron)
+        callback = autobot.ScheduledCallback(func, cron)
         scheduler.scheduleq.put(callback)
         return func
     return wrapper

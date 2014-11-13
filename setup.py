@@ -4,7 +4,7 @@ with open('requirements.txt') as reqs:
     inst_reqs = reqs.read().split('\n')
 
 setup(
-    name='autobob',
+    name='autobot',
     version='0.1.0',
     packages=find_packages(),
     author='Mikael Knutsson',
@@ -14,7 +14,7 @@ setup(
     classifiers='License :: OSI Approved :: BSD License',
     install_requires=inst_reqs,
     entry_points={
-        'console_scripts': ['autobob = autobob.main:main',
-                            'autobob_init = autobob.init:main']
+        'console_scripts': ['autobot = autobot.main:main',
+                            'autobot_init = autobot.init:main']
     }
 )

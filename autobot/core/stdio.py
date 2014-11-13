@@ -1,12 +1,12 @@
 import sys
 import threading
 import logging
-import autobob
+import autobot
 
 LOG = logging.getLogger(__name__)
 
 
-class StdioService(autobob.Service):
+class StdioService(autobot.Service):
     def __init__(self, config):
         super().__init__(config)
         self._thread = threading.Thread(name='service', target=self._loop)
@@ -16,7 +16,7 @@ class StdioService(autobob.Service):
 
     def _init_rooms(self):
         roster = [self._config['mention_name'], 'input']
-        room = autobob.Room('stdin',
+        room = autobot.Room('stdin',
                             topic='stdin fake room',
                             roster=roster,
                             reply_path=self.send_to_room)
@@ -30,16 +30,16 @@ class StdioService(autobob.Service):
             mention_name = self._config['mention_name']
             if mention_name in matches:
                 self_index = matches.index(mention_name)
-                matches[self_index] = autobob.SELF_MENTION
+                matches[self_index] = autobot.SELF_MENTION
 
             return matches
 
         for line in sys.stdin:
-            msg = autobob.Message(line,
+            msg = autobot.Message(line,
                                   'system',
                                   reply_path=room,
                                   mention_parse=mention_parse)
-            autobob.brain.messageq.put(msg)
+            autobot.brain.messageq.put(msg)
 
     def run(self):
         super().run()

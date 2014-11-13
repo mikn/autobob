@@ -3,7 +3,7 @@ import collections
 import datetime
 import logging
 import regex
-import autobob
+import autobot
 
 LOG = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ class Message(object):
         return username in self._mentions
 
     def mentions_self(self):
-        return autobob.SELF_MENTION in self._mentions
+        return autobot.SELF_MENTION in self._mentions
 
     def reply(self, message):
         LOG.debug('Sending message {} to appropriate places..'.format(message))

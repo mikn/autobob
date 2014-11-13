@@ -5,7 +5,7 @@ import logging
 
 LOG = logging.getLogger(__name__)
 
-import autobob
+import autobot
 from . import workers
 
 catchalls = []
@@ -40,7 +40,7 @@ def boot(factory):
     thread_pool = init_threads(workers.regex_worker, (matchq,))
     while True:
         message = messageq.get()
-        if type(message) is not autobob.Message:
+        if type(message) is not autobot.Message:
             if not message:
                 LOG.info('Shutting down brain thread...')
                 messageq.task_done()
@@ -85,7 +85,7 @@ def run_callbacks(factory, storage, message):
             priority, matcher = matchq.get_nowait()
             callback = matcher.get_callback(factory)
             callback(message)
-            if priority <= autobob.PRIORITY_ALWAYS:
+            if priority <= autobot.PRIORITY_ALWAYS:
                 continue
             with matchq.mutex:
                 matchq.queue.clear()

@@ -1,11 +1,11 @@
 import os.path
-import autobob
+import autobot
 
 defaults = {
     'scheduler_resolution': 0.5,
     'storage_plugin': 'ShelveStorage',
     'service_plugin': 'StdioService',
-    'core_path': os.path.join(autobob.__path__.pop(), 'core'),
+    'core_path': os.path.join(autobot.__path__.pop(), 'core'),
     'ShelveStorage': {
         'path': './shelve'
     },
