@@ -11,17 +11,16 @@ import autobot.config
 from . import brain
 from . import scheduler
 
-# TODO: Testing using Behave
-# TODO: Documentation using Sphinx
+# TODO: Core Admin Plugin
 # TODO: Read an ACTUAL configuration file
 # TODO: Plugin folder scaffolding script
 # TODO: Live plugin reloads using inotify
 # TODO: XMPP Plugin
 # TODO: HipChat Plugin
-# TODO: Documentation
-# TODO: Redis Plugin
+# TODO: Testing using Behave
+# TODO: Documentation using Sphinx
 # TODO: Format {} shorthands in plugins
-# TODO: Core Admin Plugin
+# TODO: Redis Plugin
 # TODO: ACL..?
 # TODO: Nicer CLI than logger?
 # TODO: Share lock for all methods on same object (difficult without
