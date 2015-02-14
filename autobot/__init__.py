@@ -10,7 +10,7 @@ error_handler.setLevel(logging.ERROR)
 LOG.addHandler(error_handler)
 
 from .objects import *  # NOQA
-from .plugins import Factory  # NOQA
+from .factory import Factory  # NOQA
 from . import core  # NOQA
 from . import scheduler  # NOQA
 from .decorators import *  # NOQA

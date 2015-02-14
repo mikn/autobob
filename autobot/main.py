@@ -49,7 +49,7 @@ def main():
             config.update(toml.loads(conf))
 
     LOG.debug('Importing plugins!')
-    factory = autobot.plugins.Factory(config)
+    factory = autobot.Factory(config)
 
     brain_thread = threading.Thread(
         name='brain',
