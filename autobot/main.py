@@ -1,8 +1,9 @@
-import os.path
+import os
 import sys
 import threading
 import logging
 import toml
+import argparse
 
 LOG = logging.getLogger(__name__)
 
@@ -12,7 +13,6 @@ from . import brain
 from . import scheduler
 
 # TODO: Core Admin Plugin
-# TODO: Read an ACTUAL configuration file
 # TODO: Plugin folder scaffolding script
 # TODO: Live plugin reloads using inotify
 # TODO: XMPP Plugin
@@ -23,14 +23,24 @@ from . import scheduler
 # TODO: Redis Plugin
 # TODO: ACL..?
 # TODO: Nicer CLI than logger?
-# TODO: Share lock for all methods on same object (difficult without
-# performance impact)
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description='The primary foreground script for the chatbot library'
+        'Autobot')
+    parser.add_argument('--config-file', help='The configuration file')
+    parser.add_argument('--custom-plugins', help='The folder in which '
+                        'to look for custom plugins to execute with.',
+                        default=os.curdir)
+    return parser.parse_args()
 
 
 def main():
     logging.getLogger('autobot').setLevel(logging.DEBUG)
+    args = parse_args()
 
-    f = ''
+    f = args.config_file
 
     config = autobot.config.defaults
     if f and os.path.exists(f):

@@ -7,6 +7,8 @@ LOG = logging.getLogger(__name__)
 
 
 class StdioService(autobot.Service):
+    config_defaults = {'rooms': ['stdin']}
+
     def __init__(self, config):
         super().__init__(config)
         self._thread = threading.Thread(name='service', target=self._loop)

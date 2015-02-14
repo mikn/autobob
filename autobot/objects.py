@@ -93,6 +93,8 @@ class Storage(collections.UserDict):
 
 
 class Service(object):
+    config_defaults = {'mention_name': 'autobot'}
+
     def __init__(self, config=None):
         self._config = config
         self._default_room = None

@@ -12,6 +12,7 @@ LOG = logging.getLogger(__name__)
 class Factory(object):
     def __init__(self, config):
         self._config = config
+        self._defaults = {}
         self._plugins = {}
         path = config['core_path']
         self._load_plugins(path)
@@ -31,27 +32,46 @@ class Factory(object):
 
             if full_name not in sys.modules:
                 LOG.debug('Importing plugin: {}'.format(name))
-                module = finder.find_module(full_name
-                                            ).load_module(full_name)
+                module = finder.find_module(full_name).load_module(full_name)
                 classes = inspect.getmembers(module, inspect.isclass)
-                LOG.debug('Found classes: {}'.format(classes))
                 for name, cls in classes:
                     plugin_config = self._get_plugin_config(cls, name)
-                    if issubclass(cls, autobot.Plugin):
-                        late_plugins.append((name, cls))
-                    elif plugin_config:
-                        self._plugins[name] = cls(plugin_config)
-                    else:
-                        self._plugins[name] = cls()
+                    try:
+                        if issubclass(cls, autobot.Plugin):
+                            late_plugins.append((name, cls))
+                        elif plugin_config:
+                            self._plugins[name] = cls(plugin_config)
+                        else:
+                            self._plugins[name] = cls()
+                    except Exception as e:
+                        LOG.error('Could not load plugin %s... skipping', name)
+                        LOG.debug('Error received was %s.', e)
+                        LOG.debug('Started with conf: %s', plugin_config)
+                        LOG.debug('Default dict contains: %s', self._defaults)
 
         for name, plugin in late_plugins:
-            self._plugins[name] = plugin(self)
+            try:
+                self._plugins[name] = plugin(self)
+            except Exception as e:
+                LOG.error('Could not load plugin %s... skipping', name)
+                LOG.debug('Error received was %s.', e)
+                LOG.debug('Config dict contains: %s', self._config)
 
-    def _get_plugin_config(self, cls, name):
+    def _get_plugin_config(self, cls: autobot.Plugin, name: str) -> dict:
         config = {}
+
         for base in cls.__bases__:
+            if hasattr(base, 'config_defaults'):
+                config.update(base.config_defaults)
+                self._defaults[base.__name__] = base.config_defaults
+
             if base.__name__ in self._config:
-                config = self._config[base.__name__]
+                config.update(self._config[base.__name__])
+
+        if hasattr(cls, 'config_defaults'):
+            config.update(cls.config_defaults)
+            self._defaults[cls.__name__] = cls.config_defaults
+
         if name in self._config:
             config.update(self._config[name])
 

@@ -9,12 +9,12 @@ error_handler.setFormatter(logging.Formatter(format))
 error_handler.setLevel(logging.ERROR)
 LOG.addHandler(error_handler)
 
-from .objects import *
-from .decorators import *
-from . import core
-from . import plugins
-from . import scheduler
+from .objects import *  # NOQA
+from .plugins import Factory  # NOQA
+from . import core  # NOQA
+from . import scheduler  # NOQA
+from .decorators import *  # NOQA
 
-## CONSTANTS
+# CONSTANTS
 PRIORITY_ALWAYS = -1
 SELF_MENTION = 'SELF_MENTION'
