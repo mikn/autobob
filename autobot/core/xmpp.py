@@ -24,7 +24,7 @@ class _XMPPClient(sleekxmpp.ClientXMPP):
     def __init__(self, jid, password):
         self.connected = False
 
-        super().__init__(self, jid, password)
+        super().__init__(jid, password)
 
         self.register_plugin('xep_0030')  # Service Discovery
         self.register_plugin('xep_0199')  # Ping
@@ -33,12 +33,33 @@ class _XMPPClient(sleekxmpp.ClientXMPP):
         self.register_plugin('xep_0004')  # MUC compatibility (join room)
         self.register_plugin('xep_0249')  # MUC invites
 
-        self.add_event_handler('message', self.message_received)
-        self.add_event_handler('session_start', self.session_start)
-        self.add_event_handler("disconnected", self.disconnected)
+        self.add_event_handler('message', self._message_received)
+        self.add_event_handler('session_start', self._session_start)
+        self.add_event_handler("disconnected", self._disconnected)
         # presence related handlers
-        self.add_event_handler("got_online", self.user_online)
-        self.add_event_handler("got_offline", self.user_offline)
-        self.add_event_handler("changed_status", self.user_changed_status)
+        self.add_event_handler("got_online", self._user_online)
+        self.add_event_handler("got_offline", self._user_offline)
+        self.add_event_handler("changed_status", self._user_changed_status)
         # MUC subject events
-        self.add_event_handler("groupchat_subject", self.chat_topic)
+        self.add_event_handler("groupchat_subject", self._chat_topic)
+
+    def _message_received(self, *args):
+        pass
+
+    def _session_start(self, *args):
+        pass
+
+    def _disconnected(self, *args):
+        pass
+
+    def _user_online(self, *args):
+        pass
+
+    def _user_offline(self, *args):
+        pass
+
+    def _user_changed_status(self, *args):
+        pass
+
+    def _chat_topic(self, *args):
+        pass

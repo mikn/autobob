@@ -12,7 +12,7 @@ class HelloPlugin(autobot.Plugin):
     @autobot.respond_to('^(H|h)ello,? ({mention_name})')
     def hi(self, message):
         if message.author not in self.storage['hello_replies']:
-            message.reply('Hi!')
+            message.reply('Hi, %s!' % message.author)
             self.storage['hello_replies'].append(message.author)
 
     @autobot.eavesdrop(always=True)
