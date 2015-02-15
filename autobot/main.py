@@ -76,7 +76,7 @@ def main():
 
         LOG.debug('Starting service listener!')
         service = factory.get_service()
-        service.run()
+        service.start()
 
         # TODO: Evaluate placement of this... thing
         [m.compile(mention_name=service.mention_name) for m in brain.matchers]
@@ -87,6 +87,7 @@ def main():
 
     except (KeyboardInterrupt, SystemExit):
         LOG.info('\nI have been asked to quit nicely, and so I will!')
+        service.shutdown()
         brain.shutdown()
         scheduler.shutdown()
         sys.exit()

@@ -16,7 +16,7 @@ class StdioService(autobot.Service):
         self._init_rooms()
 
     def _init_rooms(self):
-        roster = [self._config['mention_name'], 'input']
+        roster = [self._config['mention_name'], 'system']
         room = autobot.Room('stdin',
                             topic='stdin fake room',
                             roster=roster,
@@ -42,13 +42,16 @@ class StdioService(autobot.Service):
                                   mention_parse=mention_parse)
             autobot.brain.messageq.put(msg)
 
-    def run(self):
+    def start(self):
         super().run()
         self._thread.daemon = True
         try:
             self._thread.start()
         except KeyboardInterrupt:
             print('Exiting read loop...')
+
+    def shutdown(self):
+        pass
 
     def send_to_room(self, room, message):
         sys.stdout.write(message + '\n')

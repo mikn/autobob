@@ -11,9 +11,8 @@ class HelloPlugin(autobot.Plugin):
     @autobot.respond_to('^(H|h)i,? ({mention_name})')
     @autobot.respond_to('^(H|h)ello,? ({mention_name})')
     def hi(self, message):
-        if message.author not in self.storage['hello_replies']:
-            message.reply('Hi, %s!' % message.author)
-            self.storage['hello_replies'].append(message.author)
+        message.reply('Hi, %s!' % message.author)
+        self.storage['hello_replies'].append(message.author)
 
     @autobot.eavesdrop(always=True)
     def listen(self, message):

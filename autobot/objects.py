@@ -52,9 +52,17 @@ class Room(ChatObject):
     def say(self, message):
         self._reply_path(self, message)
 
+    def __str__(self):
+        return self.name
+
 
 class User(ChatObject):
-    pass
+    def __init__(self, real_name, username):
+        self.real_name = real_name
+        self.username = username
+
+    def say(self, message):
+        pass
 
 
 class MetaPlugin(type):
@@ -99,9 +107,12 @@ class Service(object):
         self._config = config
         self._default_room = None
 
-    def run(self):
+    def start(self):
         if 'rooms' not in self._config:
             raise Exception('No rooms to join defined!')
+
+    def shutdown(self):
+        raise NotImplementedError()
 
     def join_room(self, room):
         raise NotImplementedError()
@@ -115,9 +126,11 @@ class Service(object):
     @property
     def default_room(self):
         if not self._default_room:
-            room_name = self._config['rooms'][0]
+            room_name = None
             if 'default_room' in self._config:
                 room_name = self._config['default_room']
+            else:
+                room_name = self._config['rooms'][0]
             self._default_room = self.get_room(room_name)
         return self._default_room
 
