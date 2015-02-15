@@ -12,7 +12,6 @@ class StdioService(autobot.Service):
     def __init__(self, config):
         super().__init__(config)
         self._thread = threading.Thread(name='service', target=self._loop)
-        self._config = config
         self._rooms = {}
         self._init_rooms()
 

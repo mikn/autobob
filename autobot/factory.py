@@ -2,6 +2,8 @@ import inspect
 import pkgutil
 import logging
 import sys
+import os
+import traceback
 
 import autobot
 from . import helpers
@@ -15,9 +17,11 @@ class Factory(object):
         self._defaults = {}
         self._plugins = {}
         path = config['core_path']
-        self._load_plugins(path)
+        self._load_plugins(path, 'core')
+        if os.path.exists(config['plugin_path']):
+            self._load_plugins(config['plugin_path'])
 
-    def _load_plugins(self, path):
+    def _load_plugins(self, path, namespace='plugins'):
         plugin_path = helpers.abs_path(path)
         LOG.debug('Looking for plugins at {}'.format(plugin_path))
         late_plugins = []
@@ -26,8 +30,7 @@ class Factory(object):
             if ispkg:
                 continue
 
-            # TODO: Make sure the plugins are loaded in the correct namespace
-            full_name = 'autobot.core.{}'.format(name)
+            full_name = 'autobot.{}.{}'.format(namespace, name)
             LOG.debug('Found plugin: {}'.format(name))
 
             if full_name not in sys.modules:
@@ -35,7 +38,7 @@ class Factory(object):
                 module = finder.find_module(full_name).load_module(full_name)
                 classes = inspect.getmembers(module, inspect.isclass)
                 for name, cls in classes:
-                    plugin_config = self._get_plugin_config(cls, name)
+                    plugin_config = self._get_plugin_config(cls)
                     try:
                         if issubclass(cls, autobot.Plugin):
                             late_plugins.append((name, cls))
@@ -44,8 +47,9 @@ class Factory(object):
                         else:
                             self._plugins[name] = cls()
                     except Exception as e:
-                        LOG.error('Could not load plugin %s... skipping', name)
+                        LOG.warn('Could not load plugin %s' % name)
                         LOG.debug('Error received was %s.', e)
+                        LOG.debug(traceback.format_exc())
                         LOG.debug('Started with conf: %s', plugin_config)
                         LOG.debug('Default dict contains: %s', self._defaults)
 
@@ -57,23 +61,21 @@ class Factory(object):
                 LOG.debug('Error received was %s.', e)
                 LOG.debug('Config dict contains: %s', self._config)
 
-    def _get_plugin_config(self, cls, name):
+    def _get_plugin_config(self, cls, defaults=True, config=True):
         config = {}
 
         for base in cls.__bases__:
-            if hasattr(base, 'config_defaults'):
-                config.update(base.config_defaults)
-                self._defaults[base.__name__] = base.config_defaults
+            config.update(self._get_plugin_config(base, config=False))
 
-            if base.__name__ in self._config:
-                config.update(self._config[base.__name__])
-
-        if hasattr(cls, 'config_defaults'):
+        if hasattr(cls, 'config_defaults') and defaults:
             config.update(cls.config_defaults)
             self._defaults[cls.__name__] = cls.config_defaults
 
-        if name in self._config:
-            config.update(self._config[name])
+        for base in cls.__bases__:
+            config.update(self._get_plugin_config(base, defaults=False))
+
+        if cls.__name__ in self._config and config:
+            config.update(self._config[cls.__name__])
 
         return config
 

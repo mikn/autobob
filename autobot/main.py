@@ -12,11 +12,12 @@ import autobot.config
 from . import brain
 from . import scheduler
 
+# TODO: XMPP Plugin
+# TODO: HipChat Plugin
 # TODO: Core Admin Plugin
 # TODO: Plugin folder scaffolding script
 # TODO: Live plugin reloads using inotify
-# TODO: XMPP Plugin
-# TODO: HipChat Plugin
+# TODO: Event system for state change in service providers
 # TODO: Testing using Behave
 # TODO: Documentation using Sphinx
 # TODO: Format {} shorthands in plugins
@@ -29,6 +30,8 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description='The primary foreground script for the chatbot library'
         'Autobot')
+    parser.add_argument('--debug', action='store_true',
+                        help='Enable debug output')
     parser.add_argument('--config-file', help='The configuration file')
     parser.add_argument('--custom-plugins', help='The folder in which '
                         'to look for custom plugins to execute with.',
@@ -37,8 +40,9 @@ def parse_args():
 
 
 def main():
-    logging.getLogger('autobot').setLevel(logging.DEBUG)
     args = parse_args()
+    if args.debug:
+        logging.getLogger('autobot').setLevel(logging.DEBUG)
 
     f = args.config_file
 
@@ -46,7 +50,7 @@ def main():
     if f and os.path.exists(f):
         LOG.debug('Reading configuration file from {}!'.format(f))
         with open(f) as conf:
-            config.update(toml.loads(conf))
+            config.update(toml.loads(conf.read()))
 
     LOG.debug('Importing plugins!')
     factory = autobot.Factory(config)
