@@ -57,7 +57,7 @@ class Factory(object):
                 LOG.debug('Error received was %s.', e)
                 LOG.debug('Config dict contains: %s', self._config)
 
-    def _get_plugin_config(self, cls: autobot.Plugin, name: str) -> dict:
+    def _get_plugin_config(self, cls, name):
         config = {}
 
         for base in cls.__bases__:

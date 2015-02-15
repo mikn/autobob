@@ -74,6 +74,7 @@ def main():
         service = factory.get_service()
         service.run()
 
+        # TODO: Evaluate placement of this... thing
         [m.compile(mention_name=service.mention_name) for m in brain.matchers]
 
         # Make sure the main thread is blocking so we can catch the interrupt
