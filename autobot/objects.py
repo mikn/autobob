@@ -57,12 +57,16 @@ class Room(ChatObject):
 
 
 class User(ChatObject):
-    def __init__(self, real_name, username):
+    def __init__(self, real_name, name, reply_path=None):
         self.real_name = real_name
-        self.username = username
+        self.name = name
+        self._reply_path = reply_path
 
     def say(self, message):
-        pass
+        self._reply_path(self, message)
+
+    def __str__(self):
+        return self.name
 
 
 class MetaPlugin(type):

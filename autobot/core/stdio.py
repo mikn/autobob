@@ -16,18 +16,23 @@ class StdioService(autobot.Service):
         self._init_rooms()
 
     def _init_rooms(self):
-        roster = [self._config['mention_name'], 'system']
+        users = [self._config['mention_name'], 'system']
+        roster = []
+        for user in users:
+            roster.append(autobot.User(
+                user, user, reply_path=self._send_to_user))
+
         room = autobot.Room('stdin',
                             topic='stdin fake room',
                             roster=roster,
-                            reply_path=self.send_to_room)
+                            reply_path=self._send_to_room)
         self._rooms[room.name] = room
 
     def _loop(self):
         room = self.default_room
 
         def mention_parse(message):
-            matches = [u for u in room.roster if u in message]
+            matches = [u.name for u in room.roster if u.name in message]
             mention_name = self._config['mention_name']
             if mention_name in matches:
                 self_index = matches.index(mention_name)
@@ -36,14 +41,21 @@ class StdioService(autobot.Service):
             return matches
 
         for line in sys.stdin:
+            reply_path = room
+            private_match = '{}:'.format(self._config['mention_name'])
+            if line.startswith(private_match):
+                line = line[len(private_match):].lstrip()
+                user = [u for u in room.roster if u.name == 'system']
+                reply_path = user.pop()
+
             msg = autobot.Message(line,
                                   'system',
-                                  reply_path=room,
+                                  reply_path=reply_path,
                                   mention_parse=mention_parse)
             autobot.brain.messageq.put(msg)
 
     def start(self):
-        super().run()
+        super().start()
         self._thread.daemon = True
         try:
             self._thread.start()
@@ -53,7 +65,10 @@ class StdioService(autobot.Service):
     def shutdown(self):
         pass
 
-    def send_to_room(self, room, message):
+    def _send_to_user(self, user, message):
+        sys.stdout.write('{}: {}\n'.format(user, message))
+
+    def _send_to_room(self, room, message):
         sys.stdout.write(message + '\n')
 
     def get_room(self, room):
