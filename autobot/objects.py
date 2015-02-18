@@ -39,7 +39,7 @@ class Message(object):
 
 class ChatObject(object):
     def say(self, message):
-        raise NotImplementedError()
+        self._reply_path(self, message)
 
 
 class Room(ChatObject):
@@ -48,22 +48,18 @@ class Room(ChatObject):
         self.roster = roster
         self.topic = topic
         self._reply_path = reply_path
-
-    def say(self, message):
-        self._reply_path(self, message)
+        self._internal = None
 
     def __str__(self):
         return self.name
 
 
 class User(ChatObject):
-    def __init__(self, real_name, name, reply_path=None):
-        self.real_name = real_name
+    def __init__(self, name, real_name, reply_path=None):
         self.name = name
+        self.real_name = real_name
         self._reply_path = reply_path
-
-    def say(self, message):
-        self._reply_path(self, message)
+        self._internal = None
 
     def __str__(self):
         return self.name

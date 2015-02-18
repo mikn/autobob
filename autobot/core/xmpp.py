@@ -31,11 +31,14 @@ class XMPPService(autobot.Service):
         LOG.debug('Disconnecting from xmpp...')
         self._client.disconnect()
 
-    def send_to_room(self, room, message):
+    def _send_to_room(self, room, message):
         self._client.send_message(
             mto=room.name,
             mbody=message,
             mtype='groupchat')
+
+    def _send_to_user(self, user, message):
+        raise NotImplementedError()
 
     def get_room(self, room):
         return autobot.Room(room, reply_path=self.send_to_room)

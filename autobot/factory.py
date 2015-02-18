@@ -38,6 +38,7 @@ class Factory(object):
                 module = finder.find_module(full_name).load_module(full_name)
                 classes = inspect.getmembers(module, inspect.isclass)
                 for name, cls in classes:
+                    name = name.lower()
                     plugin_config = self._get_plugin_config(cls)
                     try:
                         if issubclass(cls, autobot.Plugin):
@@ -80,6 +81,7 @@ class Factory(object):
         return config
 
     def get(self, plugin):
+        plugin = plugin.lower()
         if plugin in self._plugins:
             return self._plugins[plugin]
         raise ImportError('Module {} does not exist amongst '
@@ -94,10 +96,12 @@ class Factory(object):
         return getattr(obj, func.__name__)
 
     def get_service(self):
-        return self.get(self._config['service_plugin'])
+        plugin_name = self._config['service_plugin'] + 'service'
+        return self.get(plugin_name)
 
     def get_storage(self):
-        storage = self.get(self._config['storage_plugin'])
+        plugin_name = self._config['storage_plugin'] + 'storage'
+        storage = self.get(plugin_name)
         if '_internal' not in storage:
             storage['_internal'] = {}
         return storage
