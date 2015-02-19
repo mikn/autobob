@@ -12,7 +12,6 @@ import autobot.config
 from . import brain
 from . import scheduler
 
-# TODO: XMPP Plugin
 # TODO: HipChat Plugin
 # TODO: Core Admin Plugin
 # TODO: Plugin folder scaffolding script

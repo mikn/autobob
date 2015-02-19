@@ -20,12 +20,12 @@ class StdioService(autobot.Service):
         roster = []
         for user in users:
             roster.append(autobot.User(
-                user, user, reply_path=self._send_to_user))
+                user, user, reply_handler=self._send_to_user))
 
         room = autobot.Room('stdin',
                             topic='stdin fake room',
                             roster=roster,
-                            reply_path=self._send_to_room)
+                            reply_handler=self._send_to_room)
         self._rooms[room.name] = room
 
     def _loop(self):

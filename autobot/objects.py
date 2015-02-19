@@ -4,6 +4,7 @@ import datetime
 import logging
 import regex
 import autobot
+from .helpers import DictObj
 
 LOG = logging.getLogger(__name__)
 
@@ -38,28 +39,29 @@ class Message(object):
 
 
 class ChatObject(object):
+    def __init__(self, name, reply_handler):
+        self.name = name
+        self._internal = DictObj()
+        self._reply_handler = reply_handler
+
     def say(self, message):
-        self._reply_path(self, message)
+        self._reply_handler(self, message)
 
 
 class Room(ChatObject):
-    def __init__(self, name, topic=None, roster=None, reply_path=None):
-        self.name = name
+    def __init__(self, name, topic=None, roster=None, reply_handler=None):
+        super().__init__(name, reply_handler)
         self.roster = roster
         self.topic = topic
-        self._reply_path = reply_path
-        self._internal = None
 
     def __str__(self):
         return self.name
 
 
 class User(ChatObject):
-    def __init__(self, name, real_name, reply_path=None):
-        self.name = name
+    def __init__(self, name, real_name, reply_handler=None):
+        super().__init__(name, reply_handler)
         self.real_name = real_name
-        self._reply_path = reply_path
-        self._internal = None
 
     def __str__(self):
         return self.name

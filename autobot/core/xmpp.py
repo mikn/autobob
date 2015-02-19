@@ -41,7 +41,10 @@ class XMPPService(autobot.Service):
         raise NotImplementedError()
 
     def get_room(self, room):
-        return autobot.Room(room, reply_path=self.send_to_room)
+        # TODO: validate room existence here
+        room_obj = autobot.Room(room, reply_handler=self.send_to_room)
+        room_obj._internal.name = room
+        return room_obj
 
     def _mention_parse(self, message):
         mentions = []
@@ -53,6 +56,7 @@ class XMPPService(autobot.Service):
     def _message_received(self, xmpp_message):
         LOG.debug('Message received from %s.', xmpp_message['from'].full)
         if not xmpp_message['from'].resource == self.real_name:
+            # TODO: Get User object and its parameters from server
             msg = autobot.Message(xmpp_message['body'],
                                   xmpp_message['from'],
                                   reply_path=self.default_room,
