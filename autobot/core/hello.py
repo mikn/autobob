@@ -5,14 +5,15 @@ class HelloPlugin(autobot.Plugin):
 
     def __init__(self, factory):
         super().__init__(factory)
-        if 'hello_replies' not in self.storage:
-            self.storage['hello_replies'] = []
+        if 'hello_replies' not in self.storage or (
+                not isinstance(self.storage['hello_replies'], set)):
+            self.storage['hello_replies'] = set()
 
     @autobot.respond_to('^(H|h)i,? ({mention_name})')
     @autobot.respond_to('^(H|h)ello,? ({mention_name})')
     def hi(self, message):
         message.reply('Hi, %s!' % message.author)
-        self.storage['hello_replies'].append(message.author)
+        self.storage['hello_replies'].add(message.author)
 
     @autobot.eavesdrop(always=True)
     def listen(self, message):

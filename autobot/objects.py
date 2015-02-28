@@ -45,6 +45,8 @@ class ChatObject(object):
         self._reply_handler = reply_handler
 
     def say(self, message):
+        if not self._reply_handler:
+            raise NotImplementedError()
         self._reply_handler(self, message)
 
 
@@ -56,6 +58,12 @@ class Room(ChatObject):
 
     def __str__(self):
         return self.name
+
+    def join(self):
+        pass
+
+    def leave(self):
+        pass
 
 
 class User(ChatObject):

@@ -1,8 +1,11 @@
+import threading
+import multiprocessing
 import logging
 import queue
 LOG = logging.getLogger(__name__)
 
 regexq = queue.Queue()
+callbackq = queue.Queue()
 
 
 def regex_worker(matchq):
@@ -22,3 +25,41 @@ def regex_worker(matchq):
             matchq.put((matcher.priority, matcher))
 
         regexq.task_done()
+
+
+def schedule_worker():
+    while True:
+        callback = callbackq.get()
+        if not callback or not isinstance(callback, callable):
+            callbackq.task_done()
+            return True
+
+        callback()
+        callbackq.task_done()
+
+
+def init_threads(worker, args, thread_count=None):
+    pool = []
+    try:
+        if not thread_count or thread_count < 1:
+            thread_count = multiprocessing.cpu_count()*2
+    except NotImplementedError:
+        thread_count = 4
+
+    LOG.debug('Setting thread count to: {}.'.format(thread_count))
+
+    for i in range(thread_count):
+        thread_name = '{}-{}'.format(worker.__name__, i+1)
+        t = threading.Thread(name=thread_name, target=worker, args=args)
+        pool.append(t)
+        t.start()
+
+    return pool
+
+
+def shutdown_pool(pool, queue):
+    for thread in pool:
+        LOG.info('Closing thread {}'.format(thread.name))
+        while thread.isAlive():
+            queue.put(False)
+            queue.join()

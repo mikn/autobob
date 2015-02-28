@@ -53,6 +53,12 @@ def hear(pattern, always=False, priority=50):
     return wrapper
 
 
+def subscribe_to(event_handlers):
+    def wrapper(func):
+        func._attach_class = True
+        event_handlers.append(func)
+
+
 def _pattern_handler(matcher):
     matcher._func._attach_class = True
     brain.matchers.append(matcher)

@@ -1,7 +1,6 @@
-import multiprocessing
 import queue
-import threading
 import logging
+import datetime
 
 LOG = logging.getLogger(__name__)
 
@@ -15,29 +14,11 @@ messageq = queue.Queue()
 thread_pool = []
 
 
-def init_threads(worker, args):
-    pool = []
-    try:
-        thread_count = multiprocessing.cpu_count()*2
-    except NotImplementedError:
-        thread_count = 4
-
-    LOG.debug('Setting thread count to: {}.'.format(thread_count))
-
-    for i in range(thread_count):
-        thread_name = 'regex_worker-{}'.format(i+1)
-        t = threading.Thread(name=thread_name, target=worker, args=args)
-        pool.append(t)
-        t.start()
-
-    return pool
-
-
 def boot(factory):
     global thread_pool
     storage = factory.get_storage()
 
-    thread_pool = init_threads(workers.regex_worker, (matchq,))
+    thread_pool = workers.init_threads(workers.regex_worker, (matchq,))
     while True:
         message = messageq.get()
         if type(message) is not autobot.Message:
@@ -70,11 +51,7 @@ def boot(factory):
 
 
 def shutdown():
-    for thread in thread_pool:
-        LOG.info('Closing thread {}'.format(thread.name))
-        while thread.isAlive():
-            workers.regexq.put(False)
-            workers.regexq.join()
+    workers.shutdown_pool(thread_pool, workers.regexq)
     messageq.put(False)
     messageq.join()
 
@@ -100,7 +77,8 @@ def run_callbacks(factory, storage, message):
         pass
     except Exception as e:
         LOG.error(e)
-        storage['_internal']['last_error'] = e
+        storage['_internal']['last_error'] = {'timestamp': datetime.time(),
+                                              'exception': e}
         message.reply('Ouch! That went straight to the brain! '
                       'Judging by the mechanics involved it will '
                       'probably happen if you try again as well... '

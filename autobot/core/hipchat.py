@@ -15,3 +15,6 @@ class HipChatService(XMPPService):
             mentions.append(autobot.SELF_MENTION)
 
         return mentions
+
+    def get_room(self, room_name):
+        pass

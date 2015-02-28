@@ -14,6 +14,7 @@ from .factory import Factory  # NOQA
 from . import core  # NOQA
 from . import scheduler  # NOQA
 from .decorators import *  # NOQA
+from . import event  # NOQA
 
 # CONSTANTS
 PRIORITY_ALWAYS = -1

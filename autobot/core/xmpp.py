@@ -22,6 +22,7 @@ class XMPPService(autobot.Service):
         LOG.debug('starting client with jid: {}'.format(self.jid))
         self._client = _XMPPClient(self.jid, self._config['password'], self)
         self.real_name = self._config['real_name']
+        self.rooms = []
 
     def start(self):
         self._client.connect()
@@ -33,17 +34,25 @@ class XMPPService(autobot.Service):
 
     def _send_to_room(self, room, message):
         self._client.send_message(
-            mto=room.name,
+            mto=room._internal.name,
             mbody=message,
             mtype='groupchat')
 
     def _send_to_user(self, user, message):
-        raise NotImplementedError()
+        self._client.send_message(
+            mto=user._internal.name,
+            mbody=message,
+            mtype='message')
 
-    def get_room(self, room):
+    def get_room(self, room_name):
+        # TODO: Decide what name of room we should use as input here
         # TODO: validate room existence here
-        room_obj = autobot.Room(room, reply_handler=self.send_to_room)
-        room_obj._internal.name = room
+        room_obj = autobot.Room(room_name, reply_handler=self.send_to_room)
+        for u in self._client._room_plugin.rooms[room_name].values():
+            user = autobot.User(u.name, u.real_name)
+            room_obj.roster.append(user)
+
+        room_obj._internal.name = room_name
         return room_obj
 
     def _mention_parse(self, message):

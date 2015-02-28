@@ -7,6 +7,7 @@ import traceback
 
 import autobot
 from . import helpers
+from .event import event
 
 LOG = logging.getLogger(__name__)
 
@@ -33,30 +34,35 @@ class Factory(object):
             full_name = 'autobot.{}.{}'.format(namespace, name)
             LOG.debug('Found plugin: {}'.format(name))
 
-            if full_name not in sys.modules:
-                LOG.debug('Importing plugin: {}'.format(name))
-                module = finder.find_module(full_name).load_module(full_name)
-                classes = inspect.getmembers(module, inspect.isclass)
-                for name, cls in classes:
-                    name = name.lower()
-                    plugin_config = self._get_plugin_config(cls)
-                    try:
-                        if issubclass(cls, autobot.Plugin):
-                            late_plugins.append((name, cls))
-                        elif plugin_config:
-                            self._plugins[name] = cls(plugin_config)
-                        else:
-                            self._plugins[name] = cls()
-                    except Exception as e:
-                        LOG.warn('Could not load plugin %s' % name)
-                        LOG.debug('Error received was %s.', e)
-                        LOG.debug(traceback.format_exc())
-                        LOG.debug('Started with conf: %s', plugin_config)
-                        LOG.debug('Default dict contains: %s', self._defaults)
+            if full_name in sys.modules:
+                continue
+            LOG.debug('Importing plugin: {}'.format(name))
+            module = finder.find_module(full_name).load_module(full_name)
+            classes = inspect.getmembers(module, inspect.isclass)
+            for name, cls in classes:
+                name = name.lower()
+                plugin_config = self._get_plugin_config(cls)
+                try:
+                    if issubclass(cls, autobot.Plugin):
+                        late_plugins.append((name, cls))
+                    elif plugin_config:
+                        self._plugins[name] = cls(plugin_config)
+                    else:
+                        self._plugins[name] = cls()
+                except Exception as e:
+                    LOG.warn('Could not load plugin %s' % name)
+                    LOG.debug('Error received was %s.', e)
+                    LOG.debug(traceback.format_exc())
+                    LOG.debug('Started with conf: %s', plugin_config)
+                    LOG.debug('Default dict contains: %s', self._defaults)
+                finally:
+                    if name in self._plugins:
+                        event.trigger(event.PLUGIN_LOADED, self._plugins[name])
 
         for name, plugin in late_plugins:
             try:
                 self._plugins[name] = plugin(self)
+                event.trigger(event.PLUGIN_LOADED, self._plugins[name])
             except Exception as e:
                 LOG.error('Could not load plugin %s... skipping', name)
                 LOG.debug('Error received was %s.', e)
