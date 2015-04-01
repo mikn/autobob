@@ -86,12 +86,7 @@ class MetaPlugin(type):
 class Plugin(metaclass=MetaPlugin):
     def __init__(self, factory):
         self._factory = factory
-        # Let's namespace the plugin's storage
-        storage = factory.get_storage()
-        name = type(self).__name__
-        if name not in storage:
-            storage[name] = {}
-        self.storage = storage[name]
+        self._storage = None
 
     @property
     def default_room(self):
@@ -100,6 +95,19 @@ class Plugin(metaclass=MetaPlugin):
     @property
     def service(self):
         return self._factory.get_service()
+
+    @property
+    def storage(self):
+        if not self._storage:
+            storage = self._factory.get_storage()
+            # Let's namespace the plugin's storage
+            name = type(self).__name__
+            if name not in storage:
+                storage[name] = {}
+            self._storage = storage[name]
+
+        return self._storage
+
 
 
 class Storage(collections.UserDict):

@@ -27,7 +27,8 @@ def timer_thread(factory, resolution):
     '''
     global thread_pool
     scheduled_events = []
-    thread_pool = workers.init_threads(workers.schedule_worker, ())
+    thread_pool = workers.init_threads(workers.schedule_worker, (),
+                                       thread_count=2)
     LOG.debug('Setting loops per second to: %.2f', 1 / resolution)
     while True:
         begin_time = time.monotonic()

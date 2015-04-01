@@ -87,9 +87,9 @@ def main():
 
     except (KeyboardInterrupt, SystemExit):
         LOG.info('\nI have been asked to quit nicely, and so I will!')
+        scheduler.shutdown()
         service.shutdown()
         brain.shutdown()
-        scheduler.shutdown()
         sys.exit()
 
 

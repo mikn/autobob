@@ -7,7 +7,7 @@ import traceback
 
 import autobot
 from . import helpers
-from .event import event
+from autobot import event
 
 LOG = logging.getLogger(__name__)
 

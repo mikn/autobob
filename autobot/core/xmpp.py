@@ -19,12 +19,13 @@ class XMPPService(autobot.Service):
         self.jid = '{}@{}/bot'.format(
             self._config['username'],
             self._config['server'])
-        LOG.debug('starting client with jid: {}'.format(self.jid))
+        LOG.debug('Initialising client with jid: {}'.format(self.jid))
         self._client = _XMPPClient(self.jid, self._config['password'], self)
         self.real_name = self._config['real_name']
         self.rooms = []
 
     def start(self):
+        LOG.debug('Starting client with jid: {}'.format(self.jid))
         self._client.connect()
         self._client.process()
 
