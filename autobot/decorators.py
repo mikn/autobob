@@ -53,10 +53,13 @@ def hear(pattern, always=False, priority=50):
     return wrapper
 
 
-def subscribe_to(event_handlers):
+def subscribe_to(event):
     def wrapper(func):
+        callback = autobot.Callback(func)
         func._attach_class = True
-        event_handlers.append(func)
+        autobot.event.register(event, callback)
+        return func
+    return wrapper
 
 
 def _pattern_handler(matcher):

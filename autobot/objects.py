@@ -169,6 +169,10 @@ class Callback(object):
             self.priority = func._priority
         self.lock = ''
 
+    @property
+    def __name__(self):
+        return self._func.__name__
+
     def get_callback(self, factory):
         if not self._callback:
             self._callback = factory.get_callback(self._func)

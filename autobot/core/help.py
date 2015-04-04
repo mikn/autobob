@@ -10,17 +10,18 @@ LOG = logging.getLogger(__name__)
 class HelpPlugin(autobot.Plugin):
     def __init__(self, factory):
         super().__init__(factory)
-        event.register(event.ALL_PLUGINS_LOADED, self._load_handler)
         self.docs = {}
 
-    def _load_handler(self, plugin_classes):
+    @autobot.subscribe_to(event.ALL_PLUGINS_LOADED)
+    def _load_handler(self, event_args):
+        plugin_classes = event_args['plugins']
         LOG.debug('Loading help for classes: %s', plugin_classes.keys())
         for plugin_class in plugin_classes.values():
             docs = _PluginDoc(plugin_class)
-            if docs:
+            if docs.exists:
                 self.docs[docs.plugin_name] = docs
 
-    @autobot.respond_to('^({mention_name})\s+(H|h)elp')
+    @autobot.respond_to('^{mention_name}\s+(H|h)elp')
     def help_someone(self, message):
         message.reply(repr(self.docs))
 
@@ -46,5 +47,6 @@ class _PluginDoc(object):
         }
         return repr(repr_dict)
 
-    def __bool__(self):
+    @property
+    def exists(self):
         return bool(self._method_help or self.plugin_help)

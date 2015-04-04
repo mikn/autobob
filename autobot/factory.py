@@ -76,7 +76,11 @@ class Factory(object):
                 LOG.debug('Error received was %s.', e)
                 LOG.debug('Config dict contains: %s', self._config)
 
-        event.trigger(event.ALL_PLUGINS_LOADED, self._plugins)
+        event_args = {
+            'plugins': self._plugins,
+            'factory': self
+        }
+        event.trigger(event.ALL_PLUGINS_LOADED, event_args)
 
     def _get_plugin_config(self, cls, defaults=True, config=True):
         config = {}
