@@ -77,7 +77,8 @@ def run_callbacks(factory, storage, message):
         pass
     except Exception as e:
         LOG.error(e)
-        storage['_internal']['last_error'] = {'timestamp': datetime.time(),
+        now = datetime.datetime.now()
+        storage['_internal']['last_error'] = {'timestamp': now,
                                               'exception': e}
         message.reply('Ouch! That went straight to the brain! '
                       'Judging by the mechanics involved it will '
