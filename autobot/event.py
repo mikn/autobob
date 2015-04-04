@@ -6,6 +6,7 @@ LOG = logging.getLogger(__name__)
 
 class Events(DictObj):
     PLUGIN_LOADED = 'PLUGIN_LOADED'
+    ALL_PLUGINS_LOADED = 'ALL_PLUGINS_LOADED'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -20,7 +21,7 @@ class Events(DictObj):
     def trigger(self, event, *args):
         if event not in self._handlers:
             LOG.debug('No handlers registered for event %s', event)
-        return
+            return
         for handler in self._handlers[event]:
             handler(*args)
 
