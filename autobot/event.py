@@ -7,6 +7,14 @@ LOG = logging.getLogger(__name__)
 
 
 class Events(DictObj):
+    '''
+    Provides a simple event system for the framework. It deals with handler
+    registration, deregistration and event triggering. It also supports
+    dynamically adding events and triggering them at runtime.
+    After the event ALL_PLUGINS_LOADED is triggered, there is a factory
+    instance provided which means that you can use the decorator subscription
+    mechanism to listen to any events happening after that.
+    '''
     PLUGIN_LOADED = 'PLUGIN_LOADED'
     ALL_PLUGINS_LOADED = 'ALL_PLUGINS_LOADED'
 

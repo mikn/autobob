@@ -202,14 +202,14 @@ class ScheduledCallback(Callback):
         return self.timestamp
 
     def _is_comparable(self, other):
-        return hasattr(other, 'timestamp')
+        if not hasattr(other, 'timestamp'):
+            raise NotImplemented('Cannot compare %s and %s',
+                                 type(self), type(other))
 
     def __eq__(self, other):
-        if not self._is_comparable(other):
-            return NotImplemented
+        self._is_comparable(other)
         return self.timestamp == other.timestamp
 
     def __lt__(self, other):
-        if not self._is_comparable(other):
-            return NotImplemented
+        self._is_comparable(other)
         return self.timestamp < other.timestamp
