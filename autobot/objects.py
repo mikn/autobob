@@ -15,16 +15,20 @@ class Message(object):
         self._message = message
         self._author = author
         self._reply_path = reply_path
-        if not mention_parse:
-            self._mentions = []
-        else:
-            self._mentions = mention_parse(self._message)
+        self._mentions = []
+        mention_name = ''
+        if mention_parse:
+            mention_name, self._mentions = mention_parse(message)
+            message = self._strip_mention(message, mention_name)
 
     def mentions(self, username):
         return username in self._mentions
 
     def mentions_self(self):
         return autobot.SELF_MENTION in self._mentions
+
+    def direct_message(self):
+        return issubclass(type(self._reply_path), User)
 
     def reply(self, message):
         LOG.debug('Sending message {} to appropriate places..'.format(message))
@@ -36,6 +40,11 @@ class Message(object):
     @property
     def author(self):
         return self._author
+
+    def _strip_mention(self, message, mention_name):
+        if message.startswith(mention_name):
+            message = message[len(mention_name):].strip()
+        return message
 
 
 class ChatObject(object):

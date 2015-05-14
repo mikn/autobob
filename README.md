@@ -34,7 +34,7 @@ A: Because, well. We're not doing any IO for starters. The scheduler in asyncio
    has a warning attached to it saying that you should not use it for timespans
    longer than 1 day, and well. That is a silly limitation to have when you are
    offering a cron-like scheduler to the users. I would have gotten decent
-   thread pool management through executors, but using asyncio with the 
+   thread pool management through executors, but using asyncio with the
    constraints and requirements imposed actually required more code than
    implementing a custom event loop and using proper queues and parallell
    processing patterns to develop this application.

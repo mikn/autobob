@@ -17,6 +17,9 @@ from . import scheduler  # NOQA
 from .decorators import *  # NOQA
 from . import event  # NOQA
 
+# Global lists
+format_strings = {}
+
 # CONSTANTS
 PRIORITY_ALWAYS = -1
 SELF_MENTION = 'SELF_MENTION'

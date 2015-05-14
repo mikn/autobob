@@ -58,10 +58,11 @@ class XMPPService(autobot.Service):
 
     def _mention_parse(self, message):
         mentions = []
-        if self._config['mention_name'] in message:
+        mention_name = self._config['mention_name']
+        if mention_name in message:
             mentions.append(autobot.SELF_MENTION)
 
-        return mentions
+        return mention_name, mentions
 
     def _message_received(self, xmpp_message):
         LOG.debug('Message received from %s.', xmpp_message['from'].full)

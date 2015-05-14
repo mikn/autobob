@@ -38,7 +38,7 @@ class StdioService(autobot.Service):
                 self_index = matches.index(mention_name)
                 matches[self_index] = autobot.SELF_MENTION
 
-            return matches
+            return mention_name, matches
 
         for line in sys.stdin:
             reply_path = room

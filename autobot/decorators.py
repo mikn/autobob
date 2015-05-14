@@ -26,12 +26,28 @@ def eavesdrop(always=False, priority=1000):
 
 
 def respond_to(pattern, always=False, priority=30):
+    '''
+    The methods decorated with this one is supposed to only respond to direct
+    messages to the bot/mentions and not general listening.  It does this by
+    using the mentions_self() method on the message object as a matcher
+    condition.
+    It provides a format string of {mention_name} which will be replaced with
+    the configured mention name at regexp compile time.
+    If you do not set this within the string, it will be matched against the
+    messsage received with the mention name already stripped from the beginning
+    of the message.
+    Thus, the default match without {mention_name} in the string becomes:
+    ({mention_name}:?\s*)(pattern). Since the mention name gets stripped from
+    the matched string, you can still anchor your pattern to the beginning of
+    the string.
+    This method also matches all messages received in private chats.
+    '''
     if always:
         priority = autobot.PRIORITY_ALWAYS
 
     def wrapper(func):
         def condition(message):
-            return message.mentions_self()
+            return message.mentions_self() or message.direct_message()
 
         matcher = autobot.Matcher(func,
                                   pattern,
@@ -43,6 +59,9 @@ def respond_to(pattern, always=False, priority=30):
 
 
 def hear(pattern, always=False, priority=50):
+    '''
+    It will match the pattern provided against all messages processed.
+    '''
     if always:
         priority = autobot.PRIORITY_ALWAYS
 

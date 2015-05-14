@@ -12,9 +12,13 @@ import autobot.config
 from . import brain
 from . import scheduler
 
+# TODO: Allow for adding custom format string replacements to matching strings
+# TODO: Make dev help and normal help output different things
+# TODO: Easy way to get all registered events after all plugins are loaded
 # TODO: Output formatter system
 # TODO: HipChat Plugin
 # TODO: Core Admin Plugin
+# TODO: Generic worker thread pool
 # TODO: Plugin folder scaffolding script
 # TODO: Live plugin reloads using inotify
 # TODO: Event system for state change in service providers
@@ -28,8 +32,8 @@ from . import scheduler
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='The primary foreground script for the chatbot library'
-        'Autobot')
+        description='The primary foreground script for the chatbot library '
+        'autobot')
     parser.add_argument('--debug', action='store_true',
                         help='Enable debug output')
     parser.add_argument('--config-file', help='The configuration file')
@@ -67,8 +71,8 @@ def main():
         args=(factory, config.get('scheduler_resolution'))
     )
 
-    LOG.debug('Booting brain!')
     try:
+        LOG.debug('Booting brain!')
         brain_thread.start()
 
         LOG.debug('Revving up the scheduler!')

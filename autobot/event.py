@@ -40,8 +40,8 @@ class Events(DictObj):
             if isinstance(handler, autobot.Callback):
                 if not self._factory:
                     LOG.warning('Tried registering plugin-based handler on '
-                                'event: %s before factory was available... '
-                                'skipping', event)
+                                'event: %s which happens before before '
+                                'factory is available... skipping', event)
                     continue
                 handler.get_callback(self._factory)(*args)
             else:

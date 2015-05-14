@@ -9,6 +9,7 @@ class HelloPlugin(autobot.Plugin):
                 not isinstance(self.storage['hello_replies'], set)):
             self.storage['hello_replies'] = set()
 
+    @autobot.respond_to('^(H|h)i')
     @autobot.respond_to('^(H|h)i,? ({mention_name})')
     @autobot.respond_to('^(H|h)ello,? ({mention_name})')
     def hi(self, message):
