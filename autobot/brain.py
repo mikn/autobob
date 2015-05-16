@@ -60,6 +60,7 @@ def run_callbacks(factory, storage, message):
     try:
         while True:
             priority, matcher = matchq.get_nowait()
+            LOG.debug('Priority: %s Matcher: %s', priority, matcher)
             callback = matcher.get_callback(factory)
             callback(message)
             if priority <= autobot.PRIORITY_ALWAYS:
@@ -76,6 +77,7 @@ def run_callbacks(factory, storage, message):
     except queue.Empty:
         pass
     except Exception as e:
+        # TODO: This breaks with "no .find() on builtin object or method"
         LOG.error(e)
         now = datetime.datetime.now()
         storage['_internal']['last_error'] = {'timestamp': now,

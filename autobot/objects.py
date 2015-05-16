@@ -169,6 +169,7 @@ class Service(object):
             return None
 
 
+@functools.total_ordering
 class Callback(object):
     def __init__(self, func, priority=100):
         self._callback = None
@@ -187,8 +188,30 @@ class Callback(object):
             self._callback = factory.get_callback(self._func)
         return self._callback
 
+    def _is_comparable(self, other, attr):
+        if not hasattr(other, attr):
+            raise NotImplemented('Cannot compare %s and %s',
+                                 type(self), type(other))
+
+    def __eq__(self, other):
+        self._is_comparable(other, '__name__')
+        return len(self.__name__) == len(other.__name__)
+
+    def __lt__(self, other):
+        self._is_comparable(other, '__name__')
+        return len(self.__name__) > len(other.__name__)
+
+    def __str__(self):
+        return self.__name__
+
 
 class Matcher(Callback):
+    '''
+    Matchers are sorted on pattern length, assuming that a longer pattern is
+    more specific, thus resulting in that when there's two matchers with the
+    same priority value, the one with the longer pattern gets picked from the
+    queue.
+    '''
     def __init__(self, func, pattern, priority=50, condition=lambda x: True):
         super().__init__(func, priority)
         self.pattern = pattern
@@ -198,8 +221,18 @@ class Matcher(Callback):
     def compile(self, **format_args):
         self.regex = regex.compile(self.pattern.format(**format_args))
 
+    def __eq__(self, other):
+        self._is_comparable(other, 'pattern')
+        return len(self.pattern) == len(other.pattern)
 
-@functools.total_ordering
+    def __lt__(self, other):
+        self._is_comparable(other, 'pattern')
+        return len(self.pattern) > len(other.pattern)
+
+    def __str__(self):
+        return self.pattern
+
+
 class ScheduledCallback(Callback):
     def __init__(self, func, cron):
         self._cron = cron
@@ -210,15 +243,13 @@ class ScheduledCallback(Callback):
         self.timestamp = self._cron.get_next(datetime.datetime).timestamp()
         return self.timestamp
 
-    def _is_comparable(self, other):
-        if not hasattr(other, 'timestamp'):
-            raise NotImplemented('Cannot compare %s and %s',
-                                 type(self), type(other))
-
     def __eq__(self, other):
-        self._is_comparable(other)
+        self._is_comparable(other, 'timestamp')
         return self.timestamp == other.timestamp
 
     def __lt__(self, other):
-        self._is_comparable(other)
+        self._is_comparable(other, 'timestamp')
         return self.timestamp < other.timestamp
+
+    def __str__(self):
+        return '{}: {}'.format(self.__name__, ' '.join(self._cron.exprs))
