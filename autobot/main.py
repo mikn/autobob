@@ -12,7 +12,6 @@ import autobot.config
 from . import brain
 from . import scheduler
 
-# TODO: Allow for adding custom format string replacements to matching strings
 # TODO: Make dev help and normal help output different things
 # TODO: Easy way to get all registered events after all plugins are loaded
 # TODO: Output formatter system
@@ -81,9 +80,6 @@ def main():
         LOG.debug('Starting service listener!')
         service = factory.get_service()
         service.start()
-
-        # TODO: Evaluate placement of this... thing
-        [m.compile(mention_name=service.mention_name) for m in brain.matchers]
 
         # Make sure the main thread is blocking so we can catch the interrupt
         brain_thread.join()

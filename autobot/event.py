@@ -17,6 +17,7 @@ class Events(DictObj):
     '''
     PLUGIN_LOADED = 'PLUGIN_LOADED'
     ALL_PLUGINS_LOADED = 'ALL_PLUGINS_LOADED'
+    SERVICE_STARTED = 'SERVICE_STARTED'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -62,6 +63,3 @@ class Events(DictObj):
             self._factory = event_args['factory']
         else:
             LOG.info('We already had a factory when trying to add a new one...')
-
-
-event = Events()

@@ -24,7 +24,7 @@ class XMPPService(autobot.Service):
         self.real_name = self._config['real_name']
         self.rooms = []
 
-    def start(self):
+    def run(self):
         LOG.debug('Starting client with jid: {}'.format(self.jid))
         self._client.connect()
         self._client.process()

@@ -54,8 +54,7 @@ class StdioService(autobot.Service):
                                   mention_parse=mention_parse)
             autobot.brain.messageq.put(msg)
 
-    def start(self):
-        super().start()
+    def run(self):
         self._thread.daemon = True
         try:
             self._thread.start()

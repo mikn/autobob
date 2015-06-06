@@ -9,16 +9,23 @@ error_handler.setFormatter(logging.Formatter(format))
 error_handler.setLevel(logging.ERROR)
 LOG.addHandler(error_handler)
 
+# The order here is important...
+# We start with stateless objects that have few to no internal dependencies
 from .objects import *  # NOQA
-from .event import event # NOQA
+from .event import Events  # NOQA
+from .substitutions import Substitutions  # NOQA
+
+# Global lists
+substitutions = Substitutions()
+event = Events()
+
+# Then we move on to the factory
 from .factory import Factory  # NOQA
+
+# Most of the rest of the application depend on the factory being present
 from . import core  # NOQA
 from . import scheduler  # NOQA
 from .decorators import *  # NOQA
-from . import event  # NOQA
-
-# Global lists
-format_strings = {}
 
 # CONSTANTS
 PRIORITY_ALWAYS = -1

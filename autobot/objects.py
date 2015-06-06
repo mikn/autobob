@@ -137,6 +137,14 @@ class Service(object):
     def start(self):
         if 'rooms' not in self._config:
             raise Exception('No rooms to join defined!')
+        self.run()
+        # This is done down here to make sure we don't overwrite mention_name
+        # when we have multiple service modules on the path
+        autobot.substitutions.add('mention_name', self.mention_name)
+        autobot.event.trigger(autobot.event.SERVICE_STARTED, {'service': self})
+
+    def run(self):
+        raise NotImplementedError()
 
     def shutdown(self):
         raise NotImplementedError()

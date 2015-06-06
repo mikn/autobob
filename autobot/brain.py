@@ -17,6 +17,7 @@ thread_pool = []
 def boot(factory):
     global thread_pool
     storage = factory.get_storage()
+    autobot.event.register(autobot.event.SERVICE_STARTED, _compile_regexps)
 
     thread_pool = workers.init_threads(workers.regex_worker, (matchq,))
     while True:
@@ -86,3 +87,9 @@ def run_callbacks(factory, storage, message):
                       'Judging by the mechanics involved it will '
                       'probably happen if you try again as well... '
                       'so please don\'t...')
+
+def _compile_regexps(event_args):
+    global matchers
+    LOG.debug('Compiling regexps with substitutions: %s', autobot.substitutions)
+    [m.compile(**autobot.substitutions) for m in matchers]
+

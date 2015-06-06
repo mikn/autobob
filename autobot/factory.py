@@ -5,9 +5,7 @@ import sys
 import os
 import traceback
 
-import autobot
-from . import helpers
-from autobot import event
+from autobot import event, helpers, Plugin
 
 LOG = logging.getLogger(__name__)
 
@@ -46,7 +44,7 @@ class Factory(object):
                     continue
                 try:
                     plugin_config = self._get_plugin_config(cls)
-                    if issubclass(cls, autobot.Plugin):
+                    if issubclass(cls, Plugin):
                         late_plugins.append((name, cls, plugin_config))
                         continue
 
