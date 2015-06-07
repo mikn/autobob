@@ -18,14 +18,14 @@ class HelpPlugin(autobot.Plugin):
 
         for plugin_class in plugin_classes.values():
             docs = _PluginDoc(plugin_class)
-            if docs.exists:
+            if docs:
                 self.docs[docs.plugin_name] = docs
 
-    @autobot.respond_to('^{mention_name}\s+(H|h)elp')
+    @autobot.respond_to(r'^{mention_name}\s+(H|h)elp')
     def print_user_help(self, message):
         message.reply(repr(self.docs))
 
-    @autobot.respond_to('^{mention_name} dev help')
+    @autobot.respond_to(r'^{mention_name}\s+dev(eloper)? help')
     def print_developer_help(self, message):
         message.reply(repr(self.docs))
 
@@ -60,6 +60,5 @@ class _PluginDoc(object):
         }
         return repr(repr_dict)
 
-    @property
-    def exists(self):
+    def __bool__(self):
         return bool(self.method_help or self.plugin_help)

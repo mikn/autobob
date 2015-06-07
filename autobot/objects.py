@@ -32,7 +32,10 @@ class Message(object):
 
     def reply(self, message):
         LOG.debug('Sending message {} to appropriate places..'.format(message))
-        self._reply_path.say(message)
+        if self._reply_path and hasattr(self._reply_path, 'say'):
+            self._reply_path.say(message)
+        else:
+            NotImplementedError('This message does not provide a reply path')
 
     def __str__(self):
         return self._message
@@ -76,7 +79,7 @@ class Room(ChatObject):
 
 
 class User(ChatObject):
-    def __init__(self, name, real_name, reply_handler=None):
+    def __init__(self, name, real_name=None, reply_handler=None):
         super().__init__(name, reply_handler)
         self.real_name = real_name
 
@@ -118,7 +121,6 @@ class Plugin(metaclass=MetaPlugin):
         return self._storage
 
 
-
 class Storage(collections.UserDict):
     def sync(self):
         raise NotImplementedError()
@@ -133,6 +135,7 @@ class Service(object):
     def __init__(self, config=None):
         self._config = config
         self._default_room = None
+        self._author = None
 
     def start(self):
         if 'rooms' not in self._config:
@@ -175,6 +178,12 @@ class Service(object):
             return self._config['mention_name']
         else:
             return None
+
+    @property
+    def author(self):
+        if not self._author:
+            self._author = User(self.mention_name)
+        return self._author
 
 
 @functools.total_ordering

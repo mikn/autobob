@@ -22,7 +22,6 @@ from . import brain, scheduler
 # TODO: Event system for state change in service providers
 # TODO: Testing using Behave
 # TODO: Documentation using Sphinx
-# TODO: Format {} shorthands in plugins
 # TODO: Redis Plugin
 # TODO: ACL..?
 # TODO: Nicer CLI than logger?

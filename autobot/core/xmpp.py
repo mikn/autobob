@@ -64,6 +64,12 @@ class XMPPService(autobot.Service):
 
         return mention_name, mentions
 
+    @property
+    def author(self):
+        if not self._author:
+            self._author = User(self.mention_name, self.real_name)
+        return self._author
+
     def _message_received(self, xmpp_message):
         LOG.debug('Message received from %s.', xmpp_message['from'].full)
         if not xmpp_message['from'].resource == self.real_name:
