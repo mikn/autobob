@@ -17,7 +17,7 @@ def eavesdrop(always=False, priority=1000):
         priority = autobot.PRIORITY_ALWAYS
 
     def wrapper(func):
-        func._attach_class = True
+        func._is_decorator = True
         func._priority = priority
         callback = autobot.Callback(func)
         brain.catchalls.append(callback)
@@ -75,14 +75,14 @@ def hear(pattern, always=False, priority=50):
 def subscribe_to(event):
     def wrapper(func):
         callback = autobot.Callback(func)
-        func._attach_class = True
+        func._is_decorator = True
         autobot.event.register(event, callback)
         return func
     return wrapper
 
 
 def _pattern_handler(matcher):
-    matcher._func._attach_class = True
+    matcher._func._is_decorator = True
     brain.matchers.append(matcher)
     LOG.debug('Adding pattern: {} as a matcher'.format(matcher.pattern))
 
@@ -109,7 +109,7 @@ def scheduled(minutes='*',
             month,
             day_of_week
         )
-        func._attach_class = True
+        func._is_decorator = True
         cron = croniter.croniter(cron_str)
         callback = autobot.ScheduledCallback(func, cron)
         scheduler.scheduleq.put(callback)

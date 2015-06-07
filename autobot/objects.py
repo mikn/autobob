@@ -87,7 +87,7 @@ class User(ChatObject):
 class MetaPlugin(type):
     def __new__(cls, name, bases, namespace, **kwargs):
         for method in namespace.values():
-            if hasattr(method, '_attach_class'):
+            if hasattr(method, '_is_decorator'):
                 setattr(method, '_class_name', name)
         return type.__new__(cls, name, bases, namespace, **kwargs)
 
