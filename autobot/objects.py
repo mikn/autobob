@@ -18,8 +18,7 @@ class Message(object):
         self._mentions = []
         mention_name = ''
         if mention_parse:
-            mention_name, self._mentions = mention_parse(message)
-            message = self._strip_mention(message, mention_name)
+            self._mentions = mention_parse(message)
 
     def mentions(self, username):
         return username in self._mentions
@@ -37,17 +36,16 @@ class Message(object):
         else:
             NotImplementedError('This message does not provide a reply path')
 
+    def process(self, processor):
+        if callable(processor):
+            self._message = processor(self._message)
+
     def __str__(self):
         return self._message
 
     @property
     def author(self):
         return self._author
-
-    def _strip_mention(self, message, mention_name):
-        if message.startswith(mention_name):
-            message = message[len(mention_name):].strip()
-        return message
 
 
 class ChatObject(object):
@@ -229,10 +227,12 @@ class Matcher(Callback):
     same priority value, the one with the longer pattern gets picked from the
     queue.
     '''
-    def __init__(self, func, pattern, priority=50, condition=lambda x: True):
+    def __init__(self, func, pattern, priority=50, condition=lambda x: True,
+                 preprocessor=None):
         super().__init__(func, priority)
         self.pattern = pattern
         self.condition = condition
+        self.preprocessor = preprocessor
         self.regex = None
 
     def compile(self, **format_args):

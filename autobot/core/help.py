@@ -21,11 +21,11 @@ class HelpPlugin(autobot.Plugin):
             if docs:
                 self.docs[docs.plugin_name] = docs
 
-    @autobot.respond_to(r'^{mention_name}\s+(H|h)elp')
+    @autobot.respond_to(r'^(H|h)elp')
     def print_user_help(self, message):
         message.reply(repr(self.docs))
 
-    @autobot.respond_to(r'^{mention_name}\s+dev(eloper)? help')
+    @autobot.respond_to(r'^dev(eloper)? help')
     def print_developer_help(self, message):
         message.reply(repr(self.docs))
 

@@ -49,10 +49,17 @@ def respond_to(pattern, always=False, priority=30):
         def condition(message):
             return message.mentions_self() or message.direct_message()
 
+        def preprocessor(message):
+            mention_name = autobot.substitutions['mention_name']
+            if message.startswith(mention_name):
+                message = message[len(mention_name):].strip()
+            return message
+
         matcher = autobot.Matcher(func,
                                   pattern,
                                   priority=priority,
-                                  condition=condition)
+                                  condition=condition,
+                                  preprocessor=preprocessor)
         _pattern_handler(matcher)
         return func
     return wrapper

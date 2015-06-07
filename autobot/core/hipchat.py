@@ -11,11 +11,10 @@ class HipChatService(XMPPService):
 
     def _mention_parse(self, message):
         mentions = []
-        mention_name = self._config['mention_name']
-        if mention_name in message:
+        if self._config['mention_name'] in message:
             mentions.append(autobot.SELF_MENTION)
 
-        return mention_name, mentions
+        return mentions
 
     def get_room(self, room_name):
         pass

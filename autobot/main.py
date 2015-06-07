@@ -11,9 +11,9 @@ import autobot
 import autobot.config
 from . import brain, scheduler
 
+# TODO: Output formatter system
 # TODO: Make dev help and normal help output different things
 # TODO: Easy way to get all registered events after all plugins are loaded
-# TODO: Output formatter system
 # TODO: HipChat Plugin
 # TODO: Core Admin Plugin
 # TODO: Generic worker thread pool
