@@ -15,9 +15,9 @@ class Events(DictObj):
     instance provided which means that you can use the decorator subscription
     mechanism to listen to any events happening after that.
     '''
-    PLUGIN_LOADED = 'PLUGIN_LOADED'
-    ALL_PLUGINS_LOADED = 'ALL_PLUGINS_LOADED'
-    SERVICE_STARTED = 'SERVICE_STARTED'
+    PLUGIN_LOADED = 'A module has been loaded'
+    ALL_PLUGINS_LOADED = 'The factory has finished loading all modules'
+    SERVICE_STARTED = 'The connection to a chat service has been established'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -25,13 +25,14 @@ class Events(DictObj):
         self._factory = None
         self.register(self.ALL_PLUGINS_LOADED, self._get_factory)
 
-    def add(self, event_name):
+    def add(self, event_name, description = None):
         if event_name in self.__dict__:
             raise ValueError('%s already exists as an event', event_name)
         event_name = event_name.upper()
-        setattr(self, event_name, event_name)
+        self[event_name] = event_name if not description else description
 
-    def trigger(self, event, *args):
+    def trigger(self, event_ref, *args):
+        event = self._find_key(event_ref)
         if event not in self._handlers:
             LOG.debug('No handlers registered for event %s', event)
             return
@@ -48,12 +49,14 @@ class Events(DictObj):
             else:
                 handler(*args)
 
-    def register(self, event, handler):
+    def register(self, event_ref, handler):
+        event = self._find_key(event_ref)
         if event not in self._handlers:
             self._handlers[event] = []
         self._handlers[event].append(handler)
 
-    def deregister(self, event, handler):
+    def deregister(self, event_ref, handler):
+        event = self._find_key(event_ref)
         if event not in self._handlers or handler not in self._handlers[event]:
             return
         del(self._handlers[event][self._handlers[event].index(handler)])
@@ -62,4 +65,4 @@ class Events(DictObj):
         if not self._factory:
             self._factory = event_args['factory']
         else:
-            LOG.info('We already had a factory when trying to add a new one...')
+            LOG.warn('We already had a factory when trying to add a new one...')

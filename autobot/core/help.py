@@ -9,21 +9,28 @@ LOG = logging.getLogger(__name__)
 class HelpPlugin(autobot.Plugin):
     def __init__(self, factory):
         super().__init__(factory)
-        self.docs = {}
+        self.docs = {
+            'events': None,
+            'plugins': {}
+        }
 
     @autobot.subscribe_to(autobot.event.ALL_PLUGINS_LOADED)
-    def _load_handler(self, event_args):
+    def _load_events(self, event_args):
+        self.docs['events'] = autobot.event
+
+    @autobot.subscribe_to(autobot.event.ALL_PLUGINS_LOADED)
+    def _load_plugin_docs(self, event_args):
         plugin_classes = event_args['plugins']
         LOG.debug('Loading help for classes: %s', plugin_classes.keys())
 
         for plugin_class in plugin_classes.values():
             docs = _PluginDoc(plugin_class)
             if docs:
-                self.docs[docs.plugin_name] = docs
+                self.docs['plugins'][docs.plugin_name] = docs
 
     @autobot.respond_to(r'^(H|h)elp')
     def print_user_help(self, message):
-        message.reply(repr(self.docs))
+        message.reply(repr(self.docs['plugins']))
 
     @autobot.respond_to(r'^dev(eloper)? help')
     def print_developer_help(self, message):

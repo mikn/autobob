@@ -13,14 +13,15 @@ from . import brain, scheduler
 
 # TODO: Output formatter system
 # TODO: Make dev help and normal help output different things
-# TODO: Easy way to get all registered events after all plugins are loaded
+# TODO: Lock substitutions object after the regexps have been compiled
 # TODO: HipChat Plugin
 # TODO: Core Admin Plugin
 # TODO: Generic worker thread pool
 # TODO: Plugin folder scaffolding script
 # TODO: Live plugin reloads using inotify
-# TODO: Event system for state change in service providers
 # TODO: Testing using Behave
+# TODO: Create fake factory that satisfies the needs of the brain thread
+# TODO: Make the brain and scheduler into classes rather than module methods
 # TODO: Documentation using Sphinx
 # TODO: Redis Plugin
 # TODO: ACL..?
