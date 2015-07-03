@@ -12,12 +12,13 @@ LOG.addHandler(error_handler)
 # The order here is important...
 # We start with stateless objects that have few to no internal dependencies
 from .objects import *  # NOQA
-from .event import Events  # NOQA
-from .substitutions import Substitutions  # NOQA
 
 # Global lists
-substitutions = Substitutions()
+from .event import Events  # NOQA
 event = Events()
+
+from .substitutions import Substitutions  # NOQA
+substitutions = Substitutions()
 
 # Then we move on to the factory
 from .factory import Factory  # NOQA

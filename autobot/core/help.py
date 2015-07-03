@@ -15,11 +15,11 @@ class HelpPlugin(autobot.Plugin):
         }
 
     @autobot.subscribe_to(autobot.event.ALL_PLUGINS_LOADED)
-    def _load_events(self, event_args):
+    def _load_events(self, context, event_args):
         self.docs['events'] = autobot.event
 
     @autobot.subscribe_to(autobot.event.ALL_PLUGINS_LOADED)
-    def _load_plugin_docs(self, event_args):
+    def _load_plugin_docs(self, context, event_args):
         plugin_classes = event_args['plugins']
         LOG.debug('Loading help for classes: %s', plugin_classes.keys())
 

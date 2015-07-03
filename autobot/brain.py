@@ -6,6 +6,7 @@ LOG = logging.getLogger(__name__)
 
 import autobot
 from . import workers
+from . import helpers
 
 catchalls = []
 matchers = []
@@ -18,6 +19,7 @@ def boot(factory):
     global thread_pool
     storage = factory.get_storage()
     autobot.event.register(autobot.event.SERVICE_STARTED, _compile_regexps)
+    autobot.event.register(autobot.event.SUBSTITUTIONS_ALTERED, _compile_regexps)
 
     thread_pool = workers.init_threads(workers.regex_worker, (matchq,))
     while True:
@@ -88,8 +90,12 @@ def run_callbacks(factory, storage, message):
                       'probably happen if you try again as well... '
                       'so please don\'t...')
 
-def _compile_regexps(event_args):
+@helpers.static_vars(service_started=False)
+def _compile_regexps(context, event_args):
     global matchers
-    LOG.debug('Compiling regexps with substitutions: %s', autobot.substitutions)
-    [m.compile(**autobot.substitutions) for m in matchers]
-
+    if isinstance(context, autobot.Service):
+        _compile_regexps.service_started = True
+    if _compile_regexps.service_started:
+        LOG.debug('Compiling regex with substitutions: %s',
+                  autobot.substitutions)
+        [m.compile(**autobot.substitutions) for m in matchers]

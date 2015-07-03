@@ -142,7 +142,7 @@ class Service(object):
         # This is done down here to make sure we don't overwrite mention_name
         # when we have multiple service modules on the path
         autobot.substitutions.add('mention_name', self.mention_name)
-        autobot.event.trigger(autobot.event.SERVICE_STARTED, {'service': self})
+        autobot.event.trigger(autobot.event.SERVICE_STARTED, self)
 
     def run(self):
         raise NotImplementedError()

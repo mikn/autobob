@@ -13,7 +13,7 @@ from . import brain, scheduler
 
 # TODO: Output formatter system
 # TODO: Make dev help and normal help output different things
-# TODO: Lock substitutions object after the regexps have been compiled
+# TODO: Recompile regexps every time the substitutions change
 # TODO: HipChat Plugin
 # TODO: Core Admin Plugin
 # TODO: Generic worker thread pool

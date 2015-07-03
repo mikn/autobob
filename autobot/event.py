@@ -18,6 +18,8 @@ class Events(DictObj):
     PLUGIN_LOADED = 'A module has been loaded'
     ALL_PLUGINS_LOADED = 'The factory has finished loading all modules'
     SERVICE_STARTED = 'The connection to a chat service has been established'
+    SUBSTITUTIONS_ALTERED = ('Triggers every time the substitutions object '
+        'is modified')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -31,7 +33,7 @@ class Events(DictObj):
         event_name = event_name.upper()
         self[event_name] = event_name if not description else description
 
-    def trigger(self, event_ref, *args):
+    def trigger(self, event_ref, context, event_args={}):
         event = self._find_key(event_ref)
         if event not in self._handlers:
             LOG.debug('No handlers registered for event %s', event)
@@ -39,15 +41,16 @@ class Events(DictObj):
         for handler in self._handlers[event]:
             LOG.debug('Triggering handler %s for event %s!',
                       handler.__name__, event)
+            event_args['event'] = event_ref
             if isinstance(handler, autobot.Callback):
                 if not self._factory:
                     LOG.warning('Tried registering plugin-based handler on '
                                 'event: %s which happens before before '
                                 'factory is available... skipping', event)
                     continue
-                handler.get_callback(self._factory)(*args)
+                handler.get_callback(self._factory)(context, event_args)
             else:
-                handler(*args)
+                handler(context, event_args)
 
     def register(self, event_ref, handler):
         event = self._find_key(event_ref)
@@ -61,8 +64,8 @@ class Events(DictObj):
             return
         del(self._handlers[event][self._handlers[event].index(handler)])
 
-    def _get_factory(self, event_args):
+    def _get_factory(self, context, event_args):
         if not self._factory:
-            self._factory = event_args['factory']
+            self._factory = context
         else:
             LOG.warn('We already had a factory when trying to add a new one...')

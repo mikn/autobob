@@ -54,7 +54,7 @@ class Factory(object):
                         self._plugins[name] = cls()
 
                     if name in self._plugins:
-                        event.trigger(event.PLUGIN_LOADED, self._plugins[name])
+                        event.trigger(event.PLUGIN_LOADED, self, self._plugins[name])
                 except Exception as e:
                     LOG.warn('Could not load plugin %s' % name)
                     LOG.debug('Error received was %s.', e)
@@ -68,17 +68,16 @@ class Factory(object):
                     self._plugins[name] = plugin(self, plugin_config)
                 else:
                     self._plugins[name] = plugin(self)
-                event.trigger(event.PLUGIN_LOADED, self._plugins[name])
+                event.trigger(event.PLUGIN_LOADED, self, self._plugins[name])
             except Exception as e:
                 LOG.error('Could not load plugin %s... skipping', name)
                 LOG.debug('Error received was %s.', e)
                 LOG.debug('Config dict contains: %s', self._config)
 
         event_args = {
-            'plugins': self._plugins,
-            'factory': self
+            'plugins': self._plugins
         }
-        event.trigger(event.ALL_PLUGINS_LOADED, event_args)
+        event.trigger(event.ALL_PLUGINS_LOADED, self, event_args)
 
     def _get_plugin_config(self, cls, defaults=True, config=True):
         config = {}

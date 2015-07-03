@@ -1,3 +1,4 @@
+from autobot import event
 from .helpers import DictObj
 
 
@@ -14,6 +15,8 @@ class Substitutions(DictObj):
         if key in self:
             raise KeyError('A substitution already exist for %s', key)
         self[key] = value
+        event_args = {'key': key, 'value': value}
+        event.trigger(event.SUBSTITUTIONS_ALTERED, self, event_args)
 
     def add(self, key, value):
         self.__set__(key, value)
