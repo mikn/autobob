@@ -29,10 +29,10 @@ class Message(object):
     def direct_message(self):
         return issubclass(type(self._reply_path), User)
 
-    def reply(self, message):
-        LOG.debug('Sending message {} to appropriate places..'.format(message))
+    def reply(self, message, *args):
+        LOG.debug('Sending message %s to appropriate places...', message)
         if self._reply_path and hasattr(self._reply_path, 'say'):
-            self._reply_path.say(message)
+            self._reply_path.say(message, *args)
         else:
             NotImplementedError('This message does not provide a reply path')
 
@@ -54,10 +54,10 @@ class ChatObject(object):
         self._internal = DictObj()
         self._reply_handler = reply_handler
 
-    def say(self, message):
+    def say(self, message, *args):
         if not self._reply_handler:
             raise NotImplementedError()
-        self._reply_handler(self, message)
+        self._reply_handler(self, message, *args)
 
 
 class Room(ChatObject):

@@ -23,11 +23,11 @@ class Brain(object):
         self._dirty_substitutions = False
 
     def boot(self):
-        storage = self._factory.get_storage()
         event.register(event.SERVICE_STARTED, self._compile_regexps)
         event.register(event.MESSAGE_RECEIVED, self._compile_regexps)
         event.register(event.SUBSTITUTIONS_ALTERED, self._track_substitutions)
 
+        storage = self._factory.get_storage()
         self.thread_pool = workers.init_threads(workers.regex_worker, (matchq,))
         while True:
             message = messageq.get()
@@ -37,12 +37,12 @@ class Brain(object):
                     messageq.task_done()
                     break
                 LOG.warning('Found object in message queue that was not a '
-                            'message at all! Type: {}'.format(type(message)))
+                            'message at all! Type: %s', type(message))
                 continue
             event.trigger(event.MESSAGE_RECEIVED, self)
 
-            LOG.debug('Processing message: {}'.format(message))
-            LOG.debug('Number of matchers: {}'.format(len(self.matchers)))
+            LOG.debug('Processing message: %s', message)
+            LOG.debug('Number of matchers: %s', len(self.matchers))
 
             for matcher in self.matchers:
                 workers.regexq.put((matcher, message))
@@ -79,11 +79,11 @@ class Brain(object):
                 with matchq.mutex:
                     matchq.queue.clear()
         except ImportError:
-            LOG.warning('Removing matcher with regex {} and method: {} from class '
-                        '{} because it broke, and I don\'t like rude toys.'.format(
+            LOG.warning('Removing matcher with regex %s and method: %s from class '
+                        '%s because it broke, and I don\'t like rude toys.',
                             matcher.pattern,
                             matcher._func.__name__,
-                            matcher.__func__._class_name))
+                            matcher.__func__._class_name)
             del(self.matchers[self.matchers.index(matcher)])
         except queue.Empty:
             pass

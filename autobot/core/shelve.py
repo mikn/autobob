@@ -11,7 +11,7 @@ class ShelveStorage(autobot.Storage):
 
     def __init__(self, config):
         self.data = shelve.open(config['path'], writeback=True)
-        LOG.debug('Loading file with contents: {}'.format(dict(self.data)))
+        LOG.debug('Loading file with contents: %s', dict(self.data))
 
     def sync(self):
         self.data.sync()

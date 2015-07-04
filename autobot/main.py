@@ -49,7 +49,7 @@ def main():
 
     config = autobot.config.defaults
     if f and os.path.exists(f):
-        LOG.debug('Reading configuration file from {}!'.format(f))
+        LOG.debug('Reading configuration file from %s!', f)
         with open(f) as conf:
             config.update(toml.loads(conf.read()))
 

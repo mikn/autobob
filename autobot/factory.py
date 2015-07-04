@@ -22,7 +22,7 @@ class Factory(object):
 
     def _load_plugins(self, path, namespace='plugins'):
         plugin_path = helpers.abs_path(path)
-        LOG.debug('Looking for plugins at {}'.format(plugin_path))
+        LOG.debug('Looking for plugins at %s', plugin_path)
         late_plugins = []
 
         for finder, name, ispkg in pkgutil.walk_packages(path=[plugin_path]):
@@ -30,11 +30,11 @@ class Factory(object):
                 continue
 
             full_name = 'autobot.{}.{}'.format(namespace, name)
-            LOG.debug('Found plugin: {}'.format(name))
+            LOG.debug('Found plugin: %s', name)
 
             if full_name in sys.modules:
                 continue
-            LOG.debug('Importing plugin: {}'.format(name))
+            LOG.debug('Importing plugin: %s', name)
             module = finder.find_module(full_name).load_module(full_name)
             classes = inspect.getmembers(module, inspect.isclass)
 
@@ -56,7 +56,7 @@ class Factory(object):
                     if name in self._plugins:
                         event.trigger(event.PLUGIN_LOADED, self, self._plugins[name])
                 except Exception as e:
-                    LOG.warn('Could not load plugin %s' % name)
+                    LOG.warn('Could not load plugin %s', name)
                     LOG.debug('Error received was %s.', e)
                     LOG.debug(traceback.format_exc())
                     LOG.debug('Started with conf: %s', plugin_config)

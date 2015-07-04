@@ -13,7 +13,7 @@ class HelloPlugin(autobot.Plugin):
     @autobot.respond_to('^(H|h)i,? ({mention_name})')
     @autobot.respond_to('^(H|h)ello,? ({mention_name})')
     def hi(self, message):
-        message.reply('Hi, %s!' % message.author)
+        message.reply('Hi, %s!', message.author)
         self.storage['hello_replies'].add(message.author)
 
     @autobot.eavesdrop(always=True)

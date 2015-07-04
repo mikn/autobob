@@ -19,13 +19,13 @@ class XMPPService(autobot.Service):
         self.jid = '{}@{}/bot'.format(
             self._config['username'],
             self._config['server'])
-        LOG.debug('Initialising client with jid: {}'.format(self.jid))
+        LOG.debug('Initialising client with jid: %s', self.jid)
         self._client = _XMPPClient(self.jid, self._config['password'], self)
         self.real_name = self._config['real_name']
         self.rooms = []
 
     def run(self):
-        LOG.debug('Starting client with jid: {}'.format(self.jid))
+        LOG.debug('Starting client with jid: %s', self.jid)
         self._client.connect()
         self._client.process()
 
@@ -33,16 +33,16 @@ class XMPPService(autobot.Service):
         LOG.debug('Disconnecting from xmpp...')
         self._client.disconnect()
 
-    def _send_to_room(self, room, message):
+    def _send_to_room(self, room, message, *args):
         self._client.send_message(
             mto=room._internal.name,
-            mbody=message,
+            mbody=message % args,
             mtype='groupchat')
 
-    def _send_to_user(self, user, message):
+    def _send_to_user(self, user, message, *args):
         self._client.send_message(
             mto=user._internal.name,
-            mbody=message,
+            mbody=message % args,
             mtype='message')
 
     def get_room(self, room_name):

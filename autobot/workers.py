@@ -61,7 +61,7 @@ def init_threads(worker, args, thread_count=None):
 
 def shutdown_pool(pool, queue):
     for thread in pool:
-        LOG.info('Closing thread {}'.format(thread.name))
+        LOG.info('Closing thread %s', thread.name)
         while thread.isAlive():
             queue.put(False)
             queue.join()

@@ -64,11 +64,11 @@ class StdioService(autobot.Service):
     def shutdown(self):
         pass
 
-    def _send_to_user(self, user, message):
-        sys.stdout.write('{}: {}\n'.format(user, message))
+    def _send_to_user(self, user, message, *args):
+        sys.stdout.write('{}: {}\n'.format(user, message % args))
 
-    def _send_to_room(self, room, message):
-        sys.stdout.write(message + '\n')
+    def _send_to_room(self, room, message, *args):
+        sys.stdout.write(message % args + '\n')
 
     def get_room(self, room):
         return self._rooms[room]

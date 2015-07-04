@@ -91,7 +91,7 @@ def subscribe_to(event):
 def _pattern_handler(matcher):
     matcher._func._is_decorator = True
     brain.matchers.append(matcher)
-    LOG.debug('Adding pattern: {} as a matcher'.format(matcher.pattern))
+    LOG.debug('Adding pattern: %s as a matcher', matcher.pattern)
 
 
 def randomly(func,
