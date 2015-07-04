@@ -9,11 +9,10 @@ LOG = logging.getLogger(__name__)
 
 import autobot
 import autobot.config
-from . import brain, scheduler
+from . import scheduler
 
 # TODO: Output formatter system
 # TODO: Make dev help and normal help output different things
-# TODO: Recompile regexps every time the substitutions change
 # TODO: HipChat Plugin
 # TODO: Core Admin Plugin
 # TODO: Generic worker thread pool
@@ -57,11 +56,8 @@ def main():
     LOG.debug('Importing plugins!')
     factory = autobot.Factory(config)
 
-    brain_thread = threading.Thread(
-        name='brain',
-        target=brain.boot,
-        args=(factory,)
-    )
+    brain = autobot.brain.Brain(factory, autobot.brain.matchers)
+    brain_thread = threading.Thread(name='brain', target=brain.boot)
 
     timer_thread = threading.Thread(
         name='timer',

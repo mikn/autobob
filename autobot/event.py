@@ -20,6 +20,7 @@ class Events(DictObj):
     SERVICE_STARTED = 'The connection to a chat service has been established'
     SUBSTITUTIONS_ALTERED = ('Triggers every time the substitutions object '
         'is modified')
+    MESSAGE_RECEIVED = 'A message has been posted on the message queue'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
