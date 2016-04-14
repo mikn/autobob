@@ -1,5 +1,6 @@
 import logging
 import croniter
+from datetime import datetime
 
 import autobot
 from . import brain
@@ -117,7 +118,7 @@ def scheduled(minutes='*',
             day_of_week
         )
         func._is_decorator = True
-        cron = croniter.croniter(cron_str)
+        cron = croniter.croniter(cron_str, start_time=datetime.now())
         callback = autobot.ScheduledCallback(func, cron)
         scheduler.scheduleq.put(callback)
         return func
