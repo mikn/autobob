@@ -39,5 +39,5 @@ Some examples include:
 4. All matchers will always reply in will, so you cannot have a generic matcher to catch phrases that failed more specific ones
 
 This together with the fact that we wanted to provide some new features I decided that it was a better choice to force the plugin owners to adapt their plugins to the new API. The transition should be fairly painless.
-### Why did you not base this on asyncio?!?
+### Why did you not base this on asyncio?
 Because, well. I'm not doing any IO for starters. The scheduler in asyncio has a warning attached to it saying that you should not use it for timespans longer than 1 day, and well. That is a silly limitation to have when you are offering a cron-like scheduler to the users. I would have gotten decent thread pool management through executors, but using asyncio with the constraints and requirements imposed actually required more code than implementing a custom event loop and using proper queues and parallell processing patterns to develop this application.
