@@ -17,6 +17,14 @@ Now you should have a fully functioning `autobot` command within your venv!
 It doesn't do much right now, though. You can chat with it on stdin :)
 But it will come with time...
 
+## What's missing?
+ - Output formatting - can only do plaintext right now
+ - Hipchat client is not implemented (only simple XMPP)
+ - Proper help output
+ - ACL/Admins users
+ - Documentation
+ - Tests
+
 
 ## Preemptive FAQ
 ### Why does it not have a fancy personal name?
