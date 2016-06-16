@@ -11,6 +11,7 @@ import autobot
 import autobot.config
 from . import scheduler
 
+# TODO: Get rid of all globals, let main own all instantiation
 # TODO: Output formatter system
 # TODO: Make dev help and normal help output different things
 # TODO: HipChat Plugin
@@ -53,8 +54,9 @@ def main():
         with open(f) as conf:
             config.update(toml.loads(conf.read()))
 
-    LOG.debug('Importing plugins!')
     factory = autobot.Factory(config)
+    LOG.debug('Importing plugins!')
+    factory.start()
 
     brain = autobot.brain.Brain(factory, autobot.brain.matchers)
     brain_thread = threading.Thread(name='brain', target=brain.boot)
@@ -66,12 +68,8 @@ def main():
     )
 
     try:
-        LOG.debug('Booting brain!')
         brain_thread.start()
-
-        LOG.debug('Revving up the scheduler!')
         timer_thread.start()
-
         LOG.debug('Starting service listener!')
         service = factory.get_service()
         service.start()

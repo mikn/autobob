@@ -15,10 +15,12 @@ class Factory(object):
         self._config = config
         self._defaults = {}
         self._plugins = {}
-        path = config['core_path']
+
+    def start(self):
+        path = self._config['core_path']
         self._load_plugins(path, 'core')
-        if os.path.exists(config['plugin_path']):
-            self._load_plugins(config['plugin_path'])
+        if os.path.exists(self._config['plugin_path']):
+            self._load_plugins(self._config['plugin_path'])
 
     def _load_plugins(self, path, namespace='plugins'):
         plugin_path = helpers.abs_path(path)

@@ -10,15 +10,13 @@ LOG = logging.getLogger(__name__)
 
 
 class Message(object):
-    def __init__(self, message, author, reply_path=None, mention_parse=None):
+    def __init__(self, message, author, reply_path=None, mentions=[]):
         assert issubclass(type(reply_path), ChatObject)
         self._message = message
         self._author = author
         self._reply_path = reply_path
-        self._mentions = []
+        self._mentions = mentions
         mention_name = ''
-        if mention_parse:
-            self._mentions = mention_parse(message)
 
     def mentions(self, username):
         return username in self._mentions

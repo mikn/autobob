@@ -47,11 +47,10 @@ class StdioService(autobot.Service):
                 line = line[len(private_match):].lstrip()
                 user = [u for u in room.roster if u.name == 'system']
                 reply_path = user.pop()
-
             msg = autobot.Message(line,
                                   'system',
                                   reply_path=reply_path,
-                                  mention_parse=mention_parse)
+                                  mentions=mention_parse(line))
             autobot.brain.messageq.put(msg)
 
     def run(self):

@@ -23,6 +23,7 @@ class Brain(object):
         self._dirty_substitutions = False
 
     def boot(self):
+        LOG.debug('Booting brain!')
         event.register(event.SERVICE_STARTED, self._compile_regexps)
         event.register(event.MESSAGE_RECEIVED, self._compile_regexps)
         event.register(event.SUBSTITUTIONS_ALTERED, self._track_substitutions)

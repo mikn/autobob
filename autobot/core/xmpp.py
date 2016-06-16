@@ -76,7 +76,7 @@ class XMPPService(autobot.Service):
             msg = autobot.Message(xmpp_message['body'],
                                   xmpp_message['from'],
                                   reply_path=self.default_room,
-                                  mention_parse=self._mention_parse)
+                                  mention_parse=self._mention_parse(xmpp_message['body']))
             autobot.brain.messageq.put(msg)
 
     def _session_start(self, *args):

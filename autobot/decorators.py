@@ -28,10 +28,9 @@ def eavesdrop(always=False, priority=1000):
 
 def respond_to(pattern, always=False, priority=30):
     '''
-    The methods decorated with this one is supposed to only respond to direct
-    messages to the bot/mentions and not general listening.  It does this by
-    using the mentions_self() method on the message object as a matcher
-    condition.
+    Respond only to direct messages to the bot/mentions and not general
+    listening.  It does this by using the mentions_self() method on the
+    message object as a matcher condition.
     It provides a format string of {mention_name} which will be replaced with
     the configured mention name at regexp compile time.
     If you do not set this within the string, it will be matched against the
@@ -56,11 +55,13 @@ def respond_to(pattern, always=False, priority=30):
                 message = message[len(mention_name):].strip()
             return message
 
-        matcher = autobot.Matcher(func,
-                                  pattern,
-                                  priority=priority,
-                                  condition=condition,
-                                  preprocessor=preprocessor)
+        matcher = autobot.Matcher(
+                func,
+                pattern,
+                priority=priority,
+                condition=condition,
+                preprocessor=preprocessor
+                )
         _pattern_handler(matcher)
         return func
     return wrapper

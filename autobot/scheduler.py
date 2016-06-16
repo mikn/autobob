@@ -25,6 +25,7 @@ def timer_thread(factory, resolution):
     with the execution. This thread pool is proportionate in size to the
     number of cores available.
     '''
+    LOG.debug('Revving up the scheduler!')
     global thread_pool
     scheduled_events = []
     thread_pool = workers.init_threads(workers.schedule_worker, (),
