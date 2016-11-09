@@ -4,6 +4,7 @@ import datetime
 import logging
 import regex
 import autobot
+import hashlib
 from .helpers import DictObj
 
 LOG = logging.getLogger(__name__)
@@ -16,7 +17,6 @@ class Message(object):
         self._author = author
         self._reply_path = reply_path
         self._mentions = mentions
-        mention_name = ''
 
     def mentions(self, username):
         return username in self._mentions
@@ -86,7 +86,7 @@ class User(ChatObject):
 class MetaPlugin(type):
     def __new__(cls, name, bases, namespace, **kwargs):
         for method in namespace.values():
-            if hasattr(method, '_is_decorator'):
+            if hasattr(method, '_callback_objects'):
                 setattr(method, '_class_name', name)
         return type.__new__(cls, name, bases, namespace, **kwargs)
 
@@ -132,15 +132,21 @@ class Service(object):
         self._config = config
         self._default_room = None
         self._author = None
+        self._messageq = None
 
     def start(self):
         if 'rooms' not in self._config:
             raise Exception('No rooms to join defined!')
+        if not self._messageq:
+            raise Exception('Cannot start service without message queue')
         self.run()
         # This is done down here to make sure we don't overwrite mention_name
         # when we have multiple service modules on the path
         autobot.substitutions.add('mention_name', self.mention_name)
         autobot.event.trigger(autobot.event.SERVICE_STARTED, self)
+
+    def set_message_queue(self, messageq):
+        self._messageq = messageq
 
     def run(self):
         raise NotImplementedError()
@@ -217,6 +223,11 @@ class Callback(object):
     def __str__(self):
         return self.__name__
 
+    def __hash__(self):
+        md5 = hashlib.md5()
+        md5.update(repr(self).encode('utf-8'))
+        return int(md5.hexdigest(), 16)
+
 
 class Matcher(Callback):
     '''
@@ -268,3 +279,13 @@ class ScheduledCallback(Callback):
 
     def __str__(self):
         return '{}: {}'.format(self.__name__, ' '.join(self._cron.exprs))
+
+
+class EventCallback(Callback):
+    def __init__(self, func, event):
+        super().__init__(func)
+        self._event = event
+
+    @property
+    def event(self):
+        return self._event

@@ -20,6 +20,7 @@ class HelpPlugin(autobot.Plugin):
 
     @autobot.subscribe_to(autobot.event.ALL_PLUGINS_LOADED)
     def _load_plugin_docs(self, context, event_args):
+        self.docs['plugins'] = {}
         plugin_classes = event_args['plugins']
         LOG.debug('Loading help for classes: %s', plugin_classes.keys())
 
@@ -41,6 +42,8 @@ class _PluginDoc(object):
     def __init__(self, cls):
         self.plugin_name = cls.__class__.__name__.replace('Plugin', '')
         self.plugin_help = cls.__doc__
+        if self.plugin_help:
+            self.plugin_help = self.plugin_help.strip()
         self.method_help = self._parse_methods(cls.__class__)
 
     def _parse_methods(self, cls):

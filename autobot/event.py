@@ -19,7 +19,7 @@ class Events(DictObj):
     ALL_PLUGINS_LOADED = 'The factory has finished loading all modules'
     SERVICE_STARTED = 'The connection to a chat service has been established'
     SUBSTITUTIONS_ALTERED = ('Triggers every time the substitutions object '
-        'is modified')
+                             'is modified')
     MESSAGE_RECEIVED = 'A message has been posted on the message queue'
 
     def __init__(self, *args, **kwargs):
@@ -28,7 +28,7 @@ class Events(DictObj):
         self._factory = None
         self.register(self.ALL_PLUGINS_LOADED, self._get_factory)
 
-    def add(self, event_name, description = None):
+    def add(self, event_name, description=None):
         if event_name in self.__dict__:
             raise ValueError('%s already exists as an event', event_name)
         event_name = event_name.upper()
@@ -53,6 +53,9 @@ class Events(DictObj):
             else:
                 handler(context, event_args)
 
+    def add_handler(self, handler):
+        self.register(handler.event, handler)
+
     def register(self, event_ref, handler):
         event = self._find_key(event_ref)
         if event not in self._handlers:
@@ -69,4 +72,4 @@ class Events(DictObj):
         if not self._factory:
             self._factory = context
         else:
-            LOG.warn('We already had a factory when trying to add a new one...')
+            LOG.warn('Factory already exists when trying to add a new one...')

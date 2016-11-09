@@ -66,7 +66,7 @@ class XMPPService(autobot.Service):
     @property
     def author(self):
         if not self._author:
-            self._author = User(self.mention_name, self.real_name)
+            self._author = autobot.User(self.mention_name, self.real_name)
         return self._author
 
     def _message_received(self, xmpp_message):

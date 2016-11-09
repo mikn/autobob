@@ -26,6 +26,7 @@ from .factory import Factory  # NOQA
 # Most of the rest of the application depend on the factory being present
 from . import core  # NOQA
 from . import scheduler  # NOQA
+from . import brain  # NOQA
 from .decorators import *  # NOQA
 
 # CONSTANTS

@@ -3,8 +3,6 @@ import croniter
 from datetime import datetime
 
 import autobot
-from . import brain
-from . import scheduler
 
 LOG = logging.getLogger(__name__)
 
@@ -18,10 +16,9 @@ def eavesdrop(always=False, priority=1000):
         priority = autobot.PRIORITY_ALWAYS
 
     def wrapper(func):
-        func._is_decorator = True
         func._priority = priority
         callback = autobot.Callback(func)
-        brain.catchalls.append(callback)
+        _add_callback(func, callback)
         return func
     return wrapper
 
@@ -83,17 +80,21 @@ def hear(pattern, always=False, priority=50):
 
 def subscribe_to(event):
     def wrapper(func):
-        callback = autobot.Callback(func)
-        func._is_decorator = True
-        autobot.event.register(event, callback)
+        callback = autobot.EventCallback(func, event)
+        _add_callback(func, callback)
         return func
     return wrapper
 
 
 def _pattern_handler(matcher):
-    matcher._func._is_decorator = True
-    brain.matchers.append(matcher)
+    _add_callback(matcher._func, matcher)
     LOG.debug('Adding pattern: %s as a matcher', matcher.pattern)
+
+
+def _add_callback(func, callback):
+    if not hasattr(func, '_callback_objects'):
+        func._callback_objects = []
+    func._callback_objects.append(callback)
 
 
 def randomly(func,
@@ -118,9 +119,8 @@ def scheduled(minutes='*',
             month,
             day_of_week
         )
-        func._is_decorator = True
         cron = croniter.croniter(cron_str, start_time=datetime.now())
         callback = autobot.ScheduledCallback(func, cron)
-        scheduler.scheduleq.put(callback)
+        _add_callback(func, callback)
         return func
     return wrapper

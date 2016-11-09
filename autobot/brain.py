@@ -2,25 +2,22 @@ import queue
 import logging
 import datetime
 
-LOG = logging.getLogger(__name__)
-
 import autobot
 from . import workers
-from . import helpers
 from autobot import event
 
-catchalls = []
-matchers = []
-matchq = queue.PriorityQueue()
-messageq = queue.Queue()
+LOG = logging.getLogger(__name__)
 
 
 class Brain(object):
-    def __init__(self, factory, matchers):
-        self.matchers = matchers
+    def __init__(self, factory, matchers, catchalls, messageq, workq):
         self._factory = factory
-        self.thread_pool = []
+        self.matchers = matchers
+        self.catchalls = catchalls
+        self._messageq = messageq
+        self._workq = workq
         self._dirty_substitutions = False
+        self._matchq = queue.PriorityQueue()
 
     def boot(self):
         LOG.debug('Booting brain!')
@@ -29,13 +26,12 @@ class Brain(object):
         event.register(event.SUBSTITUTIONS_ALTERED, self._track_substitutions)
 
         storage = self._factory.get_storage()
-        self.thread_pool = workers.init_threads(workers.regex_worker, (matchq,))
         while True:
-            message = messageq.get()
+            message = self._messageq.get()
             if type(message) is not autobot.Message:
                 if not message:
                     LOG.info('Shutting down brain thread...')
-                    messageq.task_done()
+                    self._messageq.task_done()
                     break
                 LOG.warning('Found object in message queue that was not a '
                             'message at all! Type: %s', type(message))
@@ -46,45 +42,43 @@ class Brain(object):
             LOG.debug('Number of matchers: %s', len(self.matchers))
 
             for matcher in self.matchers:
-                workers.regexq.put((matcher, message))
+                work = workers.regex_work(matcher, message, self._matchq)
+                self._workq.put(work)
 
-            for callback in catchalls:
-                matchq.put((callback.priority, callback))
+            for callback in self.catchalls:
+                self._matchq.put((callback.priority, callback))
 
-            workers.regexq.join()
+            self._workq.join()  # This is mixed with schedule work
 
             self.run_callbacks(self._factory, storage, message)
 
             storage.sync()
-            messageq.task_done()
+            self._messageq.task_done()
             LOG.debug('Processing done!')
 
         storage.close()
 
-
     def shutdown(self):
-        workers.shutdown_pool(self.thread_pool, workers.regexq)
-        messageq.put(False)
-        messageq.join()
-
+        self._messageq.put(False)
+        self._messageq.join()
 
     def run_callbacks(self, factory, storage, message):
         try:
             while True:
-                priority, matcher = matchq.get_nowait()
+                priority, matcher = self._matchq.get_nowait()
                 LOG.debug('Priority: %s Matcher: %s', priority, matcher)
                 callback = matcher.get_callback(factory)
                 callback(message)
                 if priority <= autobot.PRIORITY_ALWAYS:
                     continue
-                with matchq.mutex:
-                    matchq.queue.clear()
+                with self._matchq.mutex:
+                    self._matchq.queue.clear()
         except ImportError:
-            LOG.warning('Removing matcher with regex %s and method: %s from class '
-                        '%s because it broke, and I don\'t like rude toys.',
-                            matcher.pattern,
-                            matcher._func.__name__,
-                            matcher.__func__._class_name)
+            LOG.warning('Removing matcher with regex %s and method: %s from '
+                        'class %s because it broke.',
+                        matcher.pattern,
+                        matcher._func.__name__,
+                        matcher.__func__._class_name)
             del(self.matchers[self.matchers.index(matcher)])
         except queue.Empty:
             pass

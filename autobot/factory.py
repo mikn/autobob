@@ -11,10 +11,11 @@ LOG = logging.getLogger(__name__)
 
 
 class Factory(object):
-    def __init__(self, config):
+    def __init__(self, config, mapping):
         self._config = config
         self._defaults = {}
         self._plugins = {}
+        self._mapping = mapping
 
     def start(self):
         path = self._config['core_path']
@@ -50,13 +51,11 @@ class Factory(object):
                         late_plugins.append((name, cls, plugin_config))
                         continue
 
-                    if plugin_config:
-                        self._plugins[name] = cls(plugin_config)
-                    else:
-                        self._plugins[name] = cls()
+                    self._plugins[name] = self._load_plugin(cls, plugin_config)
 
                     if name in self._plugins:
-                        event.trigger(event.PLUGIN_LOADED, self, self._plugins[name])
+                        event.trigger(event.PLUGIN_LOADED, self,
+                                      self._plugins[name])
                 except Exception as e:
                     LOG.warn('Could not load plugin %s', name)
                     LOG.debug('Error received was %s.', e)
@@ -66,10 +65,8 @@ class Factory(object):
 
         for name, plugin, plugin_config in late_plugins:
             try:
-                if plugin_config:
-                    self._plugins[name] = plugin(self, plugin_config)
-                else:
-                    self._plugins[name] = plugin(self)
+                self._plugins[name] = self._load_plugin(plugin, plugin_config,
+                                                        factory=self)
                 event.trigger(event.PLUGIN_LOADED, self, self._plugins[name])
             except Exception as e:
                 LOG.error('Could not load plugin %s... skipping', name)
@@ -80,6 +77,29 @@ class Factory(object):
             'plugins': self._plugins
         }
         event.trigger(event.ALL_PLUGINS_LOADED, self, event_args)
+
+    def _load_plugin(self, cls, plugin_config=None, factory=None):
+        instance = None
+        if factory:
+            if plugin_config:
+                instance = cls(factory, plugin_config)
+            else:
+                instance = cls(factory)
+        else:
+            if plugin_config:
+                instance = cls(plugin_config)
+            else:
+                instance = cls()
+        methods = inspect.getmembers(instance, inspect.ismethod)
+        for m in [m[1] for m in methods if hasattr(m[1], '_callback_objects')]:
+            for callback_obj in m._callback_objects:
+                if callback_obj.__class__ in self._mapping:
+                    self._mapping[callback_obj.__class__](callback_obj)
+                else:
+                    LOG.error('We have a %s not in the mapping: %s' % (
+                        repr(callback_obj), self._mapping.keys()))
+
+        return instance
 
     def _get_plugin_config(self, cls, defaults=True, config=True):
         config = {}

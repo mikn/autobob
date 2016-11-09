@@ -51,7 +51,7 @@ class StdioService(autobot.Service):
                                   'system',
                                   reply_path=reply_path,
                                   mentions=mention_parse(line))
-            autobot.brain.messageq.put(msg)
+            self._messageq.put(msg)
 
     def run(self):
         self._thread.daemon = True

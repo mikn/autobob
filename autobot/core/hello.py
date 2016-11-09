@@ -2,6 +2,9 @@ import autobot
 
 
 class HelloPlugin(autobot.Plugin):
+    '''
+    A simple example plugin to demonstrate multiple matchers and storage
+    '''
 
     def __init__(self, factory):
         super().__init__(factory)

@@ -4,24 +4,23 @@ import threading
 import logging
 import toml
 import argparse
-
-LOG = logging.getLogger(__name__)
+import queue
 
 import autobot
 import autobot.config
-from . import scheduler
 
-# TODO: Get rid of all globals, let main own all instantiation
+LOG = logging.getLogger(__name__)
+
+# TODO: Get rid of all globals (autobot.event, autobot.substitions)
+# TODO: Only matches with autobot prefix right now
 # TODO: Output formatter system
 # TODO: Make dev help and normal help output different things
 # TODO: HipChat Plugin
 # TODO: Core Admin Plugin
-# TODO: Generic worker thread pool
 # TODO: Plugin folder scaffolding script
 # TODO: Live plugin reloads using inotify
 # TODO: Testing using Behave
 # TODO: Create fake factory that satisfies the needs of the brain thread
-# TODO: Make the brain and scheduler into classes rather than module methods
 # TODO: Documentation using Sphinx
 # TODO: Redis Plugin
 # TODO: ACL..?
@@ -54,35 +53,53 @@ def main():
         with open(f) as conf:
             config.update(toml.loads(conf.read()))
 
-    factory = autobot.Factory(config)
+    matchers = []
+    catchalls = []
+    event_callbacks = autobot.event
+    workq = queue.Queue()
+    messageq = queue.Queue()
+    scheduleq = queue.Queue()
+    mapping = {
+            autobot.Callback: catchalls.append,
+            autobot.Matcher: matchers.append,
+            autobot.ScheduledCallback: scheduleq.put,
+            autobot.EventCallback: event_callbacks.add_handler,
+    }
+
+    factory = autobot.Factory(config, mapping)
     LOG.debug('Importing plugins!')
     factory.start()
 
-    brain = autobot.brain.Brain(factory, autobot.brain.matchers)
+    brain = autobot.brain.Brain(factory, matchers, catchalls, messageq, workq)
     brain_thread = threading.Thread(name='brain', target=brain.boot)
 
-    timer_thread = threading.Thread(
-        name='timer',
-        target=scheduler.timer_thread,
-        args=(factory, config.get('scheduler_resolution'))
-    )
+    scheduler = autobot.scheduler.Scheduler(
+                factory, config.get('scheduler_resolution'), scheduleq, workq
+                )
+    scheduler_thread = threading.Thread(name='timer', target=scheduler.boot)
+
+    worker_pool = autobot.workers.WorkerPool(workq)
 
     try:
+        worker_pool.start()
         brain_thread.start()
-        timer_thread.start()
+        scheduler_thread.start()
+
         LOG.debug('Starting service listener!')
         service = factory.get_service()
+        service.set_message_queue(messageq)
         service.start()
 
         # Make sure the main thread is blocking so we can catch the interrupt
         brain_thread.join()
-        timer_thread.join()
+        scheduler_thread.join()
 
     except (KeyboardInterrupt, SystemExit):
         LOG.info('\nI have been asked to quit nicely, and so I will!')
         scheduler.shutdown()
         service.shutdown()
         brain.shutdown()
+        worker_pool.shutdown()
         sys.exit()
 
 
