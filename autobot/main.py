@@ -11,8 +11,6 @@ import autobot.config
 
 LOG = logging.getLogger(__name__)
 
-# TODO: Get rid of all globals (autobot.event, autobot.substitions)
-# TODO: Only matches with autobot prefix right now
 # TODO: Output formatter system
 # TODO: Make dev help and normal help output different things
 # TODO: HipChat Plugin

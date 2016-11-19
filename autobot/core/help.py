@@ -31,7 +31,21 @@ class HelpPlugin(autobot.Plugin):
 
     @autobot.respond_to(r'^(H|h)elp')
     def print_user_help(self, message):
-        message.reply(repr(self.docs['plugins']))
+        msg = 'General Information\n'
+        for plugin in self.docs['plugins'].values():
+            msg += '%s\n%s' % (
+                    plugin.plugin_name,
+                    plugin.plugin_help
+                    )
+            if plugin.method_help:
+                msg += '\nMethods:\n'
+            for m_help in plugin.method_help:
+                msg += '%s\nPatterns: %s\n%s' % (
+                        m_help['name'],
+                        ', '.join(m_help['patterns']),
+                        m_help['help']
+                        )
+        message.reply(msg)
 
     @autobot.respond_to(r'^dev(eloper)? help')
     def print_developer_help(self, message):
@@ -53,7 +67,8 @@ class _PluginDoc(object):
             if method.__doc__ and hasattr(method, '_is_decorator'):
                 LOG.debug('Found method %s with help text!', method.__name__)
                 # Find all patterns that executes the method
-                matchers = autobot.brain.matchers
+                objs = method._callback_objects
+                matchers = [m for m in objs if isinstance(m, autobot.Matcher)]
                 patterns = [m.pattern for m in matchers if method == m._func]
                 method_help.append({
                     'name': method.__name__,

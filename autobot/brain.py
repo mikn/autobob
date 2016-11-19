@@ -1,6 +1,7 @@
 import queue
 import logging
 import datetime
+import time
 
 import autobot
 from . import workers
@@ -28,6 +29,7 @@ class Brain(object):
         storage = self._factory.get_storage()
         while True:
             message = self._messageq.get()
+            start_time = time.time()
             if type(message) is not autobot.Message:
                 if not message:
                     LOG.info('Shutting down brain thread...')
@@ -54,7 +56,8 @@ class Brain(object):
 
             storage.sync()
             self._messageq.task_done()
-            LOG.debug('Processing done!')
+            proc_time = (time.time() - start_time) * 1000
+            LOG.debug('Processing took %0.2fms!' % proc_time)
 
         storage.close()
 
