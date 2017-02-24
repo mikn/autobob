@@ -72,8 +72,8 @@ def main():
     brain_thread = threading.Thread(name='brain', target=brain.boot)
 
     scheduler = autobot.scheduler.Scheduler(
-                factory, config.get('scheduler_resolution'), scheduleq, workq
-                )
+        factory, config.get('scheduler_resolution'), scheduleq, workq
+    )
     scheduler_thread = threading.Thread(name='timer', target=scheduler.boot)
 
     worker_pool = autobot.workers.WorkerPool(workq)

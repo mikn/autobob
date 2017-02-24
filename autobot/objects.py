@@ -4,6 +4,7 @@ import datetime
 import logging
 import regex
 import autobot
+from autobot.errors import ConfigurationMissingError
 import hashlib
 from .helpers import DictObj
 
@@ -126,17 +127,17 @@ class Storage(collections.UserDict):
 
 
 class Service(object):
-    config_defaults = {'mention_name': 'autobot'}
+    config_defaults = {'mention_name': 'autobot', 'rooms': []}
 
     def __init__(self, config=None):
         self._config = config
-        self._default_room = None
+        self._default_room = False
         self._author = None
         self._messageq = None
 
     def start(self):
         if 'rooms' not in self._config:
-            raise Exception('No rooms to join defined!')
+            raise ConfigurationMissingError('No rooms to join defined!')
         if not self._messageq:
             raise Exception('Cannot start service without message queue')
         self.run()
@@ -165,13 +166,15 @@ class Service(object):
 
     @property
     def default_room(self):
-        if not self._default_room:
-            room_name = None
+        if self._default_room is False:
             if 'default_room' in self._config:
-                room_name = self._config['default_room']
+                self._default_room = self.get_room(
+                    self._config['default_room']
+                )
+            elif self._config['rooms']:
+                self._default_room = self.get_room(self._config['rooms'][0])
             else:
-                room_name = self._config['rooms'][0]
-            self._default_room = self.get_room(room_name)
+                self._default_room = None
         return self._default_room
 
     @property
